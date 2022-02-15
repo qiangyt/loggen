@@ -22,6 +22,7 @@ func main() {
 		if !ok || bunyanOptions == nil {
 			return
 		}
-		bunyan.Generate(bunyanOptions)
+		g := bunyan.NewGenerator(bunyanOptions)
+		g.Generate()
 	}
 }

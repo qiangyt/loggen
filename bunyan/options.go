@@ -16,7 +16,7 @@ const (
 )
 
 type OptionsT struct {
-	common.Options
+	parent common.Options
 }
 
 type Options = *OptionsT
@@ -24,7 +24,7 @@ type Options = *OptionsT
 func OptionsWithCommandLine(parent common.Options) (bool, Options) {
 
 	r := &OptionsT{
-		parent,
+		parent: parent,
 	}
 
 	args := parent.SubArgs()
@@ -34,8 +34,6 @@ func OptionsWithCommandLine(parent common.Options) (bool, Options) {
 		if arg == "-h" || arg == "--help" {
 			r.PrintHelp()
 			return false, nil
-		} else {
-
 		}
 	}
 
@@ -51,7 +49,5 @@ func (i Options) PrintHelp() {
 	fmt.Println()
 
 	fmt.Println("bunyan options:")
-	fmt.Printf("  -c,  --config <server config file path>                     Specify server config YAML file path. The default is ./jog.server.yaml or $HOME/.jog/jog.server.yaml \n")
-	fmt.Printf("  -t,  --template                                             Print a server config YAML file template\n")
 	fmt.Println()
 }

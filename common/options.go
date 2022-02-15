@@ -3,6 +3,9 @@ package common
 import (
 	"fmt"
 	"os"
+	"time"
+
+	"github.com/pkg/errors"
 )
 
 const (
@@ -18,6 +21,11 @@ type OptionsT struct {
 	logType string
 	subArgs []string
 	version string
+
+	timeBegin       time.Time
+	timeIntervalMin uint32
+	timeIntervalMax uint32
+	number          uint32
 }
 
 type Options = *OptionsT
@@ -38,16 +46,42 @@ func (i Options) Version() string {
 	return i.version
 }
 
+func (i Options) TimeBegin() time.Time {
+	return i.timeBegin
+}
+
+func (i Options) TimeIntervalMin() uint32 {
+	return i.timeIntervalMin
+}
+
+func (i Options) TimeIntervalMax() uint32 {
+	return i.timeIntervalMax
+}
+
+func (i Options) Number() uint32 {
+	return i.number
+}
+
 func OptionsWithCommandLine(version string) (bool, Options) {
 
 	r := &OptionsT{
-		debug:   false,
-		subArgs: []string{},
-		version: version,
+		debug:           false,
+		subArgs:         []string{},
+		version:         version,
+		timeBegin:       time.Now(),
+		timeIntervalMin: 10,        // 10 ms
+		timeIntervalMax: 10 * 1000, // 10 seconds
+		number: 10,
 	}
 
-	for i := 1; i < len(os.Args); i++ {
-		arg := os.Args[i]
+	args := os.Args
+	for i := 1; i < len(args); i++ {
+		arg := args[i]
+
+		argValue := ""
+		if i+1 < len(args) {
+			argValue = args[i+1]
+		}
 
 		var isOption bool
 		if arg[0:1] == "-" {
@@ -69,10 +103,34 @@ func OptionsWithCommandLine(version string) (bool, Options) {
 				fmt.Println("please input log type argument")
 				r.PrintVersion()
 				return false, nil
+			} else if arg == "--time-begin" {
+				if i+1 >= len(args) {
+					panic(errors.New("missing --time-begin argument value"))
+				}
+				r.timeBegin = ParseTimestamp(argValue)
+				i++
+			} else if arg == "--time-interval-min" {
+				if i+1 >= len(args) {
+					panic(errors.New("missing --time-interval-min argument value"))
+				}
+				r.timeIntervalMin = uint32(ParseUint(argValue, 20))
+				i++
+			} else if arg == "--time-interval-max" {
+				if i+1 >= len(args) {
+					panic(errors.New("missing --time-interval-max argument value"))
+				}
+				r.timeIntervalMax = uint32(ParseUint(argValue, 20))
+				i++
+			} else if arg == "-n" || arg == "--number" {
+				if i+1 >= len(args) {
+					panic(fmt.Errorf("missing %s argument value", arg))
+				}
+				r.number = uint32(ParseUint(argValue, 31))
+				i++
 			} else {
 				r.subArgs = append(r.subArgs, arg)
 			}
-		} else {
+		} else if i == 1 {
 			switch arg {
 			case LogType_bunyan:
 				r.logType = LogType_bunyan
@@ -81,6 +139,8 @@ func OptionsWithCommandLine(version string) (bool, Options) {
 				r.PrintVersion()
 				return false, nil
 			}
+		} else {
+			r.subArgs = append(r.subArgs, arg)
 		}
 	}
 
@@ -89,12 +149,18 @@ func OptionsWithCommandLine(version string) (bool, Options) {
 		r.PrintVersion()
 		return false, nil
 	}
+
+	if r.timeIntervalMin > r.timeIntervalMax {
+		panic(fmt.Errorf("--time-interval-min (%d) cannot be great than --time-interval-max (%d)",
+			r.timeIntervalMin, r.timeIntervalMax))
+	}
+
 	return true, r
 }
 
 // PrintVersion ...
 func (i Options) PrintVersion() {
-	fmt.Printf("ver %s\n", i.Version())
+	fmt.Printf("version: %s\n", i.Version())
 }
 
 // PrintHelp ...
@@ -104,10 +170,14 @@ func (i Options) PrintHelp() {
 	fmt.Println()
 
 	fmt.Println("Global options:")
-	fmt.Printf("  -d,  --debug                    Print more error detail\n")
-	fmt.Printf("  -h,  --help                     Display this information\n")
-	fmt.Printf("  <log type> -h,  server --help   Display log type specific help information\n")
-	fmt.Printf("  -V,  --version                  Display app version information\n")
+	fmt.Printf("  -d,  --debug                                                  Print more error detail\n")
+	fmt.Printf("  -h,  --help                                                   Display this information\n")
+	fmt.Printf("  <log type> -h,  server --help                                 Display log type specific help information\n")
+	fmt.Printf("  -V,  --version                                                Display app version information\n")
+	fmt.Printf("  --time-begin <begin time>                                     Timestamp of first log line, default is now \n")
+	fmt.Printf("  --time-interval-min <minimal time interval by milliseconds>   Default is 10 \n")
+	fmt.Printf("  --time-interval-max <maximal time interval by milliseconds>   Default is 10000 (10 sec) \n")
+	fmt.Printf("  -n,  --number <number of log lines to generate                Default is 10 \n")
 	fmt.Println()
 
 	fmt.Println("Supported log types:")
