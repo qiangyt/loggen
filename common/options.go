@@ -94,7 +94,7 @@ func (i Options) PrintVersion() {
 
 // PrintHelp ...
 func (i Options) PrintHelp() {
-	fmt.Println("\nloggen: Log generator for jog(https://github.com/qiangyt/jog) developement only.")
+	fmt.Println("\nloggen: Log generator for jog(https://github.com/qiangyt/jog) development only.")
 	i.PrintVersion()
 	fmt.Println()
 

@@ -1,6 +1,6 @@
 # loggen
 
-Log generator for jog(https://github.com/qiangyt/jog) developement only.
+Log generator for jog(https://github.com/qiangyt/jog) development only.
 
 ## Build
 
