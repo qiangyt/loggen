@@ -57,7 +57,7 @@ func OptionsWithCommandLine(version string) (bool, Options) {
 		}
 
 		if isOption {
-			if arg == "-h" || arg == "--help" {
+			if (arg == "-h" || arg == "--help") && len(r.logType) == 0 {
 				r.PrintHelp()
 				return false, nil
 			} else if arg == "-V" || arg == "--version" {
@@ -77,19 +77,24 @@ func OptionsWithCommandLine(version string) (bool, Options) {
 			case LogType_bunyan:
 				r.logType = LogType_bunyan
 			default:
-				fmt.Printf("log type '%s' is not supported", arg)
+				fmt.Printf("log type '%s' is not supported\n", arg)
 				r.PrintVersion()
 				return false, nil
 			}
 		}
 	}
 
+	if len(r.logType) == 0 {
+		fmt.Printf("missing log type argument\n")
+		r.PrintVersion()
+		return false, nil
+	}
 	return true, r
 }
 
 // PrintVersion ...
 func (i Options) PrintVersion() {
-	fmt.Println(i.Version())
+	fmt.Printf("ver %s\n", i.Version())
 }
 
 // PrintHelp ...

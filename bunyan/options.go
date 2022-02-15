@@ -2,7 +2,6 @@ package bunyan
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/qiangyt/loggen/common"
 )
@@ -28,8 +27,9 @@ func OptionsWithCommandLine(parent common.Options) (bool, Options) {
 		parent,
 	}
 
-	for i := 0; i < len(parent.SubArgs()); i++ {
-		arg := os.Args[i]
+	args := parent.SubArgs()
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
 
 		if arg == "-h" || arg == "--help" {
 			r.PrintHelp()
