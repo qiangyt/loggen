@@ -14,9 +14,10 @@ const (
 )
 
 type GeneratorT struct {
-	options   Options
-	timestamp time.Time
-	chooser   *wr.Chooser
+	options      Options
+	timestamp    time.Time
+	levelChooser *wr.Chooser
+	pIdArray     []uint32
 }
 
 type Generator = *GeneratorT
@@ -24,7 +25,7 @@ type Generator = *GeneratorT
 func NewGenerator(options Options) Generator {
 	parentOptions := options.parent
 
-	chooser, _ := wr.NewChooser(
+	levelChooser, _ := wr.NewChooser(
 		wr.Choice{Item: LogLevel_TRACE, Weight: uint(parentOptions.LevelWeightTrace())},
 		wr.Choice{Item: LogLevel_DEBUG, Weight: uint(parentOptions.LevelWeightDebug())},
 		wr.Choice{Item: LogLevel_INFO, Weight: uint(parentOptions.LevelWeightInfo())},
@@ -33,10 +34,23 @@ func NewGenerator(options Options) Generator {
 		wr.Choice{Item: LogLevel_FATAL, Weight: uint(parentOptions.LevelWeightFatal())},
 	)
 
-	return &GeneratorT{
-		options: options,
-		chooser: chooser,
+	pIdArray := []uint32{}
+	for i := 0; i < int(parentOptions.PidAmount()); i++ {
+		pIdArange := int32(parentOptions.PidEnd() - parentOptions.PidBegin())
+		pId := parentOptions.PidBegin() + uint32(rand.Int31n(pIdArange))
+		pIdArray = append(pIdArray, pId)
 	}
+
+	return &GeneratorT{
+		options:      options,
+		levelChooser: levelChooser,
+		pIdArray:     pIdArray,
+	}
+}
+
+func (i Generator) NextPid() uint32 {
+	index := rand.Intn(len(i.pIdArray))
+	return i.pIdArray[index]
 }
 
 func (i Generator) NextTimestamp() string {
@@ -56,7 +70,7 @@ func (i Generator) NextTimestamp() string {
 }
 
 func (i Generator) NextLevel() uint32 {
-	return i.chooser.Pick().(uint32)
+	return i.levelChooser.Pick().(uint32)
 }
 
 func (i Generator) Generate() {
@@ -65,7 +79,7 @@ func (i Generator) Generate() {
 		lineObj := map[string]interface{}{
 			"time":     i.NextTimestamp(),
 			"level":    i.NextLevel(),
-			"pid":      16,
+			"pid":      i.NextPid(),
 			"v":        0,
 			"id":       "Config",
 			"name":     "tca_amplicon_admin",

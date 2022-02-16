@@ -33,6 +33,10 @@ type OptionsT struct {
 	levelWeightError uint32
 	levelWeightFatal uint32
 
+	pIdBegin  uint32
+	pIdEnd    uint32
+	pIdAmount uint32
+
 	number uint32
 }
 
@@ -94,6 +98,18 @@ func (i Options) LevelWeightFatal() uint32 {
 	return i.levelWeightFatal
 }
 
+func (i Options) PidBegin() uint32 {
+	return i.pIdBegin
+}
+
+func (i Options) PidEnd() uint32 {
+	return i.pIdEnd
+}
+
+func (i Options) PidAmount() uint32 {
+	return i.pIdAmount
+}
+
 func OptionsWithCommandLine(version string) (bool, Options) {
 
 	r := &OptionsT{
@@ -109,6 +125,9 @@ func OptionsWithCommandLine(version string) (bool, Options) {
 		levelWeightWarn:  10,
 		levelWeightError: 5,
 		levelWeightFatal: 5,
+		pIdBegin:         1000,
+		pIdEnd:           100000,
+		pIdAmount:        1,
 		number:           10,
 	}
 
@@ -195,6 +214,24 @@ func OptionsWithCommandLine(version string) (bool, Options) {
 				}
 				r.levelWeightFatal = uint32(ParseUint(argValue, 20))
 				i++
+			} else if arg == "--pid-begin" {
+				if i+1 >= len(args) {
+					panic(errors.New("missing --pid-begin argument value"))
+				}
+				r.pIdBegin = uint32(ParseUint(argValue, 20))
+				i++
+			} else if arg == "--pid-end" {
+				if i+1 >= len(args) {
+					panic(errors.New("missing --pid-end argument value"))
+				}
+				r.pIdEnd = uint32(ParseUint(argValue, 20))
+				i++
+			} else if arg == "--pid-amount" {
+				if i+1 >= len(args) {
+					panic(errors.New("missing --pid-amount argument value"))
+				}
+				r.pIdAmount = uint32(ParseUint(argValue, 20))
+				i++
 			} else if arg == "-n" || arg == "--number" {
 				if i+1 >= len(args) {
 					panic(fmt.Errorf("missing %s argument value", arg))
@@ -259,7 +296,11 @@ func (i Options) PrintHelp() {
 	fmt.Printf("  --level-weight-error <random weight of ERROR level>           Default is 5 \n")
 	fmt.Printf("  --level-weight-fatal <random weight of FATAL level>           Default is 5 \n")
 
-	fmt.Printf("  -n,  --number <number of log lines to generate                Default is 10 \n")
+	fmt.Printf("  --pid-begin <begin of PID>                                    Default is 1000 \n")
+	fmt.Printf("  --pid-end <end of PID>                                        Default is 100000 \n")
+	fmt.Printf("  --pid-amount <amount of PID>                                  Default is 1 \n")
+
+	fmt.Printf("  -n,  --number <number of log lines to generate>               Default is 10 \n")
 	fmt.Println()
 
 	fmt.Println("Supported log types:")
