@@ -1,4 +1,4 @@
-package common
+package options
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/qiangyt/loggen/pkg/res"
+	_time "github.com/qiangyt/loggen/pkg/time"
 )
 
 // ----------------------------------
@@ -26,7 +27,7 @@ func (i Options) PrintConfigTemplate() {
 	fmt.Println(res.GetDefaultConfigYaml())
 }
 
-func OptionsWithCommandLine(version string) (bool, Options) {
+func WithCommandLine(version string) (bool, Options) {
 
 	r := &OptionsT{
 		Debug:   false,
@@ -64,13 +65,13 @@ func OptionsWithCommandLine(version string) (bool, Options) {
 				if i+1 >= len(args) {
 					panic(errors.New("missing --time-begin argument value"))
 				}
-				r.TimeBegin = ParseTimestamp(argValue)
+				r.TimeBegin = _time.ParseTimestamp(argValue)
 				i++
 			} else if arg == "-n" || arg == "--number" {
 				if i+1 >= len(args) {
 					panic(fmt.Errorf("missing %s argument value", arg))
 				}
-				r.Number = uint32(ParseUint(argValue, 31))
+				r.Number = uint32(_time.ParseUint(argValue, 31))
 				i++
 			} else if arg == "-t" || arg == "--template" {
 				r.PrintConfigTemplate()

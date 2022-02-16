@@ -1,4 +1,4 @@
-package io
+package _io
 
 import (
 	"io/ioutil"

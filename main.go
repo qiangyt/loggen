@@ -1,8 +1,6 @@
 package main
 
-import (
-	"github.com/qiangyt/loggen/common"
-)
+import "github.com/qiangyt/loggen/pkg/options"
 
 // go build -ldflags "-X main.Version=x.y.z"
 var (
@@ -11,7 +9,7 @@ var (
 )
 
 func main() {
-	ok, options := common.OptionsWithCommandLine(Version)
+	ok, options := options.WithCommandLine(Version)
 	if !ok || options == nil {
 		return
 	}
