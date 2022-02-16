@@ -1,0 +1,78 @@
+timestamp:
+  begin: # Timestamp of first log line, default is now
+  intervalMin: 10 # minimal time interval, as milliseconds
+  intervalMax: 10000 # maximal time interval, as milliseconds
+
+number: 10 # number of log lines to generate
+
+apps:
+  - name: nginx
+    type: bunyan
+    weight: 4
+    level:
+      weightTrace: 5 # random weight of TRACE level
+      weightDebug: 5 # random weight of DEBUG level
+      weightInfo: 70 # random weight of INFO level
+      weightWarn: 10 # random weight of WARN level
+      weightError: 5 # random weight of ERROR level
+      weightFatal: 5
+    pid:
+      begin: 1000 # begin of PID
+      end: 2000 # begin of PID
+      amount: 2 # amount of PID
+  - name: api-gateway
+    type: bunyan
+    weight: 2
+    level:
+      weightTrace: 5
+      weightDebug: 5
+      weightInfo: 70
+      weightWarn: 10
+      weightError: 5
+      weightFatal: 5
+    pid:
+      begin: 2000
+      end: 3000
+      amount: 2
+  - name: order-app
+    type: bunyan
+    weight: 6
+    level:
+      weightTrace: 5
+      weightDebug: 5
+      weightInfo: 70
+      weightWarn: 10
+      weightError: 5
+      weightFatal: 5
+    pid:
+      begin: 3000
+      end: 4000
+      amount: 3
+  - name: account-app
+    type: bunyan
+    weight: 8
+    level:
+      weightTrace: 5
+      weightDebug: 5
+      weightInfo: 70
+      weightWarn: 10
+      weightError: 5
+      weightFatal: 5
+    pid:
+      begin: 4000
+      end: 5000
+      amount: 3
+  - name: pay-app
+    type: bunyan
+    weight: 3
+    level:
+      weightTrace: 5
+      weightDebug: 5
+      weightInfo: 70
+      weightWarn: 10
+      weightError: 5
+      weightFatal: 5
+    pid:
+      begin: 5000
+      end: 6000
+      amount: 3
