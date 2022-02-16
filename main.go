@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/qiangyt/loggen/bunyan"
 	"github.com/qiangyt/loggen/common"
 )
 
@@ -17,12 +16,4 @@ func main() {
 		return
 	}
 
-	if options.LogType() == common.LogType_bunyan {
-		ok, bunyanOptions := bunyan.OptionsWithCommandLine(options)
-		if !ok || bunyanOptions == nil {
-			return
-		}
-		g := bunyan.NewGenerator(bunyanOptions)
-		g.Generate()
-	}
 }

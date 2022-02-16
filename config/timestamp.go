@@ -3,7 +3,7 @@ package config
 import "time"
 
 type TimestampT struct {
-	Begin       *time.Time
+	Begin       time.Time
 	IntervalMin uint32
 	IntervalMax uint32
 }

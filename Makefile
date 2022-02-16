@@ -1,15 +1,33 @@
 GOPATH:=$(shell go env GOPATH)
 VERSION=$(shell git describe --tags --always)
 
+.PHONY: init
+# init env
+init:
+	go install github.com/rakyll/statik@v0.1.7
+
 .PHONY: clean
 # clean
 clean:
 	rm -rf ./target
 
+.PHONY: generate
+# generate
+generate:
+	statik -src=./res/raw -dest=./res -f -include=* -ns=res
+	go fmt ./...
+
 .PHONY: build
 # build
 build:
 	go build -trimpath -ldflags "-X main.Version=$(VERSION)" -o ./target/loggen ./
+
+.PHONY: all
+# all
+all:
+	make clean;
+	make generate;
+	make build;
 
 # show help
 help:
