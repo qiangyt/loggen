@@ -7,12 +7,12 @@ import (
 )
 
 const (
-	LogLevel_TRACE = 10
-	LogLevel_DEBUG = 20
-	LogLevel_INFO  = 30
-	LogLevel_WARN  = 40
-	LogLevel_ERROR = 50
-	LogLevel_FATAL = 60
+	LogLevel_TRACE uint32 = 10
+	LogLevel_DEBUG uint32 = 20
+	LogLevel_INFO  uint32 = 30
+	LogLevel_WARN  uint32 = 40
+	LogLevel_ERROR uint32 = 50
+	LogLevel_FATAL uint32 = 60
 )
 
 type OptionsT struct {

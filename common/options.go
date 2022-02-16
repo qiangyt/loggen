@@ -25,7 +25,15 @@ type OptionsT struct {
 	timeBegin       time.Time
 	timeIntervalMin uint32
 	timeIntervalMax uint32
-	number          uint32
+
+	levelWeightTrace uint32
+	levelWeightDebug uint32
+	levelWeightInfo  uint32
+	levelWeightWarn  uint32
+	levelWeightError uint32
+	levelWeightFatal uint32
+
+	number uint32
 }
 
 type Options = *OptionsT
@@ -62,16 +70,46 @@ func (i Options) Number() uint32 {
 	return i.number
 }
 
+func (i Options) LevelWeightTrace() uint32 {
+	return i.levelWeightTrace
+}
+
+func (i Options) LevelWeightDebug() uint32 {
+	return i.levelWeightDebug
+}
+
+func (i Options) LevelWeightInfo() uint32 {
+	return i.levelWeightInfo
+}
+
+func (i Options) LevelWeightWarn() uint32 {
+	return i.levelWeightWarn
+}
+
+func (i Options) LevelWeightError() uint32 {
+	return i.levelWeightError
+}
+
+func (i Options) LevelWeightFatal() uint32 {
+	return i.levelWeightFatal
+}
+
 func OptionsWithCommandLine(version string) (bool, Options) {
 
 	r := &OptionsT{
-		debug:           false,
-		subArgs:         []string{},
-		version:         version,
-		timeBegin:       time.Now(),
-		timeIntervalMin: 10,        // 10 ms
-		timeIntervalMax: 10 * 1000, // 10 seconds
-		number: 10,
+		debug:            false,
+		subArgs:          []string{},
+		version:          version,
+		timeBegin:        time.Now(),
+		timeIntervalMin:  10,        // 10 ms
+		timeIntervalMax:  10 * 1000, // 10 seconds
+		levelWeightTrace: 5,
+		levelWeightDebug: 5,
+		levelWeightInfo:  70,
+		levelWeightWarn:  10,
+		levelWeightError: 5,
+		levelWeightFatal: 5,
+		number:           10,
 	}
 
 	args := os.Args
@@ -120,6 +158,42 @@ func OptionsWithCommandLine(version string) (bool, Options) {
 					panic(errors.New("missing --time-interval-max argument value"))
 				}
 				r.timeIntervalMax = uint32(ParseUint(argValue, 20))
+				i++
+			} else if arg == "--level-weight-trace" {
+				if i+1 >= len(args) {
+					panic(errors.New("missing --level-weight-trace argument value"))
+				}
+				r.levelWeightTrace = uint32(ParseUint(argValue, 20))
+				i++
+			} else if arg == "--level-weight-debug" {
+				if i+1 >= len(args) {
+					panic(errors.New("missing --level-weight-debug argument value"))
+				}
+				r.levelWeightDebug = uint32(ParseUint(argValue, 20))
+				i++
+			} else if arg == "--level-weight-info" {
+				if i+1 >= len(args) {
+					panic(errors.New("missing --level-weight-info argument value"))
+				}
+				r.levelWeightInfo = uint32(ParseUint(argValue, 20))
+				i++
+			} else if arg == "--level-weight-warn" {
+				if i+1 >= len(args) {
+					panic(errors.New("missing --level-weight-warn argument value"))
+				}
+				r.levelWeightWarn = uint32(ParseUint(argValue, 20))
+				i++
+			} else if arg == "--level-weight-error" {
+				if i+1 >= len(args) {
+					panic(errors.New("missing --level-weight-error argument value"))
+				}
+				r.levelWeightError = uint32(ParseUint(argValue, 20))
+				i++
+			} else if arg == "--level-weight-fatal" {
+				if i+1 >= len(args) {
+					panic(errors.New("missing --level-weight-fatal argument value"))
+				}
+				r.levelWeightFatal = uint32(ParseUint(argValue, 20))
 				i++
 			} else if arg == "-n" || arg == "--number" {
 				if i+1 >= len(args) {
@@ -177,6 +251,14 @@ func (i Options) PrintHelp() {
 	fmt.Printf("  --time-begin <begin time>                                     Timestamp of first log line, default is now \n")
 	fmt.Printf("  --time-interval-min <minimal time interval by milliseconds>   Default is 10 \n")
 	fmt.Printf("  --time-interval-max <maximal time interval by milliseconds>   Default is 10000 (10 sec) \n")
+
+	fmt.Printf("  --level-weight-trace <random weight of TRACE level>           Default is 5 \n")
+	fmt.Printf("  --level-weight-debug <random weight of DEBUG level>           Default is 5 \n")
+	fmt.Printf("  --level-weight-info <random weight of INFO level>             Default is 70 \n")
+	fmt.Printf("  --level-weight-warn <random weight of WARN level>             Default is 10 \n")
+	fmt.Printf("  --level-weight-error <random weight of ERROR level>           Default is 5 \n")
+	fmt.Printf("  --level-weight-fatal <random weight of FATAL level>           Default is 5 \n")
+
 	fmt.Printf("  -n,  --number <number of log lines to generate                Default is 10 \n")
 	fmt.Println()
 
