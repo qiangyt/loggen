@@ -14,6 +14,8 @@ type AppT struct {
 	Level  Level
 	Pid    Pid
 	Weight uint32
+
+	Loggers []Logger
 }
 
 type App = *AppT
@@ -30,7 +32,7 @@ func (i App) Normalize(hint string) {
 	i.NormalzieLevel()
 	i.NormalizePid(hint)
 	i.NormalizeWeight()
-
+	i.NormalizeLoggers(hint)
 }
 
 func (i App) NormalizeName(hint string) {
@@ -66,4 +68,23 @@ func (i App) NormalzieLevel() {
 		i.Level = NewLevel()
 	}
 	i.Level.Normalize()
+}
+
+func (i App) NormalizeLoggers(hint string) {
+	if len(i.Loggers) == 0 {
+		panic(fmt.Errorf("%s: at least 1 logger is required", hint))
+	}
+
+	byNames := map[string]Logger{}
+	for idx, logger := range i.Loggers {
+		loggerHint := fmt.Sprintf("%s.logger[%d]", hint, idx)
+
+		name := logger.Name
+		if _, found := byNames[name]; found {
+			panic(fmt.Errorf("%s.name(%s) is duplicated", loggerHint, name))
+		}
+		byNames[name] = logger
+
+		logger.Normalize(loggerHint)
+	}
 }

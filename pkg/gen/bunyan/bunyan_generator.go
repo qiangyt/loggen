@@ -26,8 +26,9 @@ type GeneratorT struct {
 	config config.Config
 	app    config.App
 
-	levelChooser *wr.Chooser
-	pIdArray     []uint32
+	levelChooser  *wr.Chooser
+	pIdArray      []uint32
+	loggerChooser *wr.Chooser
 }
 
 type Generator = *GeneratorT
@@ -56,11 +57,22 @@ func NewGenerator(config config.Config, app config.App) gen.Generator {
 		pIdArray = append(pIdArray, pId)
 	}
 
+	loggerChoices := []wr.Choice{}
+	for _, logger := range app.Loggers {
+		loggerChoices = append(loggerChoices, wr.Choice{
+			Item:   logger,
+			Weight: uint(logger.Weight),
+		})
+	}
+
+	loggerChooser, _ := wr.NewChooser(loggerChoices...)
+
 	return &GeneratorT{
-		config:       config,
-		app:          app,
-		levelChooser: levelChooser,
-		pIdArray:     pIdArray,
+		config:        config,
+		app:           app,
+		levelChooser:  levelChooser,
+		pIdArray:      pIdArray,
+		loggerChooser: loggerChooser,
 	}
 }
 
@@ -91,4 +103,9 @@ func (i Generator) NextTimestamp(timestamp *time.Time) string {
 
 func (i Generator) NextLevel() uint32 {
 	return i.levelChooser.Pick().(uint32)
+}
+
+func (i Generator) NextLogger() string {
+	logger := i.loggerChooser.Pick().(config.Logger)
+	return logger.Name
 }

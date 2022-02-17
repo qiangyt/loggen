@@ -20,6 +20,11 @@ apps:
       begin: 1000 # begin of PID
       end: 2000 # begin of PID
       amount: 2 # amount of PID
+    loggers:
+      - name: req
+        weight: 1
+      - name: resp
+        weight: 1
   - name: api-gateway
     type: bunyan
     weight: 2
@@ -34,6 +39,11 @@ apps:
       begin: 2000
       end: 3000
       amount: 2
+    loggers:
+      - name: dispatcher
+        weight: 3
+      - name: backend
+        weight: 1
   - name: order-app
     type: bunyan
     weight: 6
@@ -48,6 +58,13 @@ apps:
       begin: 3000
       end: 4000
       amount: 3
+    loggers:
+      - name: order-controller
+        weight: 1
+      - name: order-service
+        weight: 3
+      - name: order-repository
+        weight: 6
   - name: account-app
     type: bunyan
     weight: 8
@@ -61,7 +78,14 @@ apps:
     pid:
       begin: 4000
       end: 5000
-      amount: 3
+      amount: 3    
+    loggers:
+      - name: account-controller
+        weight: 1
+      - name: account-service
+        weight: 3
+      - name: account-repository
+        weight: 6
   - name: pay-app
     type: bunyan
     weight: 3
@@ -75,4 +99,13 @@ apps:
     pid:
       begin: 5000
       end: 6000
-      amount: 3
+      amount: 3   
+    loggers:
+      - name: pay-controller
+        weight: 1
+      - name: pay-service
+        weight: 3
+      - name: pay-repository
+        weight: 6
+      - name: pay-gateway
+        weight: 10

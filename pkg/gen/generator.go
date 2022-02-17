@@ -12,6 +12,7 @@ type Generator interface {
 	NextTimestamp(timestamp *time.Time) string
 	NextLevel() uint32
 	App() config.App
+	NextLogger() string
 }
 
 type GeneratorBuilder func(config config.Config, app config.App) Generator

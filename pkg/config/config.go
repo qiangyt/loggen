@@ -109,7 +109,16 @@ func (i Config) NormalizeApps() {
 		panic(errors.New("at least 1 app is required"))
 	}
 
+	byNames := map[string]App{}
 	for idx, app := range i.Apps {
-		app.Normalize(fmt.Sprintf("apps[%d]", idx))
+		hint := fmt.Sprintf("apps[%d]", idx)
+
+		name := app.Name
+		if _, found := byNames[name]; found {
+			panic(fmt.Errorf("%s.name(%s) is duplicated", hint, name))
+		}
+		byNames[name] = app
+
+		app.Normalize(hint)
 	}
 }

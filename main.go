@@ -50,7 +50,6 @@ func main() {
 
 	for n = 0; n < cfg.Number; n++ {
 		g := appChooser.Pick().(gen.Generator)
-
 		timestampText := g.NextTimestamp(&timestamp)
 
 		lineObj := map[string]interface{}{
@@ -58,7 +57,7 @@ func main() {
 			"level":    g.NextLevel(),
 			"pid":      g.NextPid(),
 			"v":        0,
-			"id":       "Config",
+			"id":       g.NextLogger(),
 			"name":     g.App().Name,
 			"hostname": "db9c2f8e0b7c",
 			"path":     "/usr/src/app/config/config.json",
