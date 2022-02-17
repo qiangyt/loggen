@@ -36,9 +36,9 @@ func HasGenerator(name string) bool {
 }
 
 func BuildGenerator(config Config, app App) Generator {
-	builder, found := generatorBuilders[app.Type]
+	builder, found := generatorBuilders[app.Generator]
 	if !found {
-		panic(fmt.Errorf("invalid app(name=%s) type: %s", app.Name, app.Type))
+		panic(fmt.Errorf("invalid app(name=%s) generator: %s", app.Name, app.Generator))
 	}
 	return builder(config, app)
 }

@@ -11,14 +11,14 @@ const (
 )
 
 type AppT struct {
-	Name   string
-	Type   string
-	Level  Level
-	Pid    Pid
-	Weight uint32
+	Name      string
+	Generator string
+	Level     Level
+	Pid       Pid
+	Weight    uint32
 
-	Loggers   []Logger
-	Generator Generator
+	Loggers      []Logger
+	GeneratorObj Generator `yaml:"-"`
 }
 
 type App = *AppT
@@ -31,7 +31,7 @@ func (i App) Normalize(cfg Config, hint string) {
 	i.NormalizeName(hint)
 	hint = fmt.Sprintf("%s(name=%s)", hint, i.Name)
 
-	i.NormalizeType(cfg, hint)
+	i.NormalizeGenerator(cfg, hint)
 	i.NormalzieLevel()
 	i.NormalizePid(hint)
 	i.NormalizeWeight()
@@ -44,11 +44,11 @@ func (i App) NormalizeName(hint string) {
 	}
 }
 
-func (i App) NormalizeType(cfg Config, hint string) {
-	name := i.Type
+func (i App) NormalizeGenerator(cfg Config, hint string) {
+	name := i.Generator
 
 	if len(name) == 0 {
-		panic(fmt.Errorf("missing %s.name", hint))
+		panic(fmt.Errorf("missing %s.generator", hint))
 	}
 
 	if !IsValidGeneratorName(name) {
@@ -56,7 +56,7 @@ func (i App) NormalizeType(cfg Config, hint string) {
 			hint, name, EnumerateGeneratorNames()))
 	}
 
-	i.Generator = BuildGenerator(cfg, i)
+	i.GeneratorObj = BuildGenerator(cfg, i)
 }
 
 func (i App) BuildChoice() wr.Choice {

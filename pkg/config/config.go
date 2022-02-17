@@ -21,7 +21,7 @@ type ConfigT struct {
 	Timestamp  Timestamp
 	Number     uint32
 	Apps       []App
-	appChooser *wr.Chooser
+	appChooser *wr.Chooser `yaml:"-"`
 }
 
 type Config = *ConfigT

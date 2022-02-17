@@ -33,7 +33,7 @@ func main() {
 
 	for n = 0; n < cfg.Number; n++ {
 		app := cfg.ChooseApp()
-		g := app.Generator
+		g := app.GeneratorObj
 
 		timestampText := g.NextTimestamp(&timestamp)
 
