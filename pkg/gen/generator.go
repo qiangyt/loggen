@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	wr "github.com/mroth/weightedrand"
 	"github.com/qiangyt/loggen/pkg/config"
 )
 
@@ -50,5 +51,18 @@ func EnumerateGeneratorNames() []string {
 	for name, _ := range generatorBuilders {
 		r = append(r, name)
 	}
+	return r
+}
+
+func CreateAppChooser(cfg config.Config) *wr.Chooser {
+	choices := []wr.Choice{}
+	for _, app := range cfg.Apps {
+		choices = append(choices, wr.Choice{
+			Item:   BuildGenerator(cfg, app),
+			Weight: uint(app.Weight),
+		})
+	}
+
+	r, _ := wr.NewChooser(choices...)
 	return r
 }

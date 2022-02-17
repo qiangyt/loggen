@@ -37,10 +37,8 @@ func init() {
 	gen.RegisterGenerator("bunyan", NewGenerator)
 }
 
-func NewGenerator(config config.Config, app config.App) gen.Generator {
-	level := app.Level
-
-	levelChooser, _ := wr.NewChooser(
+func BuildLevelChooser(level config.Level) *wr.Chooser {
+	r, _ := wr.NewChooser(
 		wr.Choice{Item: LogLevel_TRACE, Weight: uint(level.WeightTrace)},
 		wr.Choice{Item: LogLevel_DEBUG, Weight: uint(level.WeightDebug)},
 		wr.Choice{Item: LogLevel_INFO, Weight: uint(level.WeightInfo)},
@@ -48,31 +46,38 @@ func NewGenerator(config config.Config, app config.App) gen.Generator {
 		wr.Choice{Item: LogLevel_ERROR, Weight: uint(level.WeightError)},
 		wr.Choice{Item: LogLevel_FATAL, Weight: uint(level.WeightFatal)},
 	)
+	return r
+}
 
-	pid := app.Pid
-	pIdArray := []uint32{}
+func BuildPidArray(pid config.Pid) []uint32 {
+	r := []uint32{}
 	for i := 0; i < int(pid.Amount); i++ {
 		pIdArange := int32(pid.End - pid.Begin)
 		pId := pid.Begin + uint32(rand.Int31n(pIdArange))
-		pIdArray = append(pIdArray, pId)
+		r = append(r, pId)
 	}
+	return r
+}
 
+func BuilderLoggerChooser(loggers []config.Logger) *wr.Chooser {
 	loggerChoices := []wr.Choice{}
-	for _, logger := range app.Loggers {
+	for _, logger := range loggers {
 		loggerChoices = append(loggerChoices, wr.Choice{
 			Item:   logger,
 			Weight: uint(logger.Weight),
 		})
 	}
+	r, _ := wr.NewChooser(loggerChoices...)
+	return r
+}
 
-	loggerChooser, _ := wr.NewChooser(loggerChoices...)
-
+func NewGenerator(config config.Config, app config.App) gen.Generator {
 	return &GeneratorT{
 		config:        config,
 		app:           app,
-		levelChooser:  levelChooser,
-		pIdArray:      pIdArray,
-		loggerChooser: loggerChooser,
+		levelChooser:  BuildLevelChooser(app.Level),
+		pIdArray:      BuildPidArray(app.Pid),
+		loggerChooser: BuilderLoggerChooser(app.Loggers),
 	}
 }
 

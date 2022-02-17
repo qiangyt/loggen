@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"time"
 
-	wr "github.com/mroth/weightedrand"
 	"github.com/qiangyt/loggen/pkg/config"
 	"github.com/qiangyt/loggen/pkg/gen"
 	"github.com/qiangyt/loggen/pkg/options"
@@ -20,19 +19,6 @@ var (
 	Version string
 )
 
-func CreateAppChooser(cfg config.Config) *wr.Chooser {
-	appChoices := []wr.Choice{}
-	for _, app := range cfg.Apps {
-		appChoices = append(appChoices, wr.Choice{
-			Item:   gen.BuildGenerator(cfg, app),
-			Weight: uint(app.Weight),
-		})
-	}
-
-	r, _ := wr.NewChooser(appChoices...)
-	return r
-}
-
 func main() {
 	rand.Seed(time.Now().Unix())
 
@@ -43,7 +29,7 @@ func main() {
 
 	cfg := config.NewConfigWithOptions(options)
 
-	appChooser := CreateAppChooser(cfg)
+	appChooser := gen.CreateAppChooser(cfg)
 
 	timestamp := time.Time{}
 	var n uint32
