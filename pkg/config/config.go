@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	wr "github.com/mroth/weightedrand"
 	"github.com/pkg/errors"
 	_io "github.com/qiangyt/loggen/pkg/io"
 	"github.com/qiangyt/loggen/pkg/options"
@@ -17,9 +18,10 @@ const (
 )
 
 type ConfigT struct {
-	Timestamp Timestamp
-	Number    uint32
-	Apps      []App
+	Timestamp  Timestamp
+	Number     uint32
+	Apps       []App
+	appChooser *wr.Chooser
 }
 
 type Config = *ConfigT
@@ -67,7 +69,9 @@ func NewConfigWithOptions(options options.Options) Config {
 		if app == nil {
 			panic(fmt.Errorf("app %s not found", options.AppName))
 		}
+
 		r.Apps = []App{app}
+		r.appChooser = r.BuildAppChooser()
 	}
 
 	return r
@@ -81,6 +85,8 @@ func NewConfigWithYaml(yamlText string) Config {
 	}
 
 	r.Normalize()
+
+	r.appChooser = r.BuildAppChooser()
 
 	return r
 }
@@ -121,4 +127,21 @@ func (i Config) NormalizeApps() {
 
 		app.Normalize(hint)
 	}
+}
+
+func (i Config) BuildAppChooser() *wr.Chooser {
+	choices := []wr.Choice{}
+	for _, app := range i.Apps {
+		choices = append(choices, wr.Choice{
+			Item:   BuildGenerator(i, app),
+			Weight: uint(app.Weight),
+		})
+	}
+
+	r, _ := wr.NewChooser(choices...)
+	return r
+}
+
+func (i Config) ChooseGeneratorForApp() Generator {
+	return i.appChooser.Pick().(Generator)
 }

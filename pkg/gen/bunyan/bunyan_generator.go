@@ -6,7 +6,6 @@ import (
 
 	wr "github.com/mroth/weightedrand"
 	"github.com/qiangyt/loggen/pkg/config"
-	"github.com/qiangyt/loggen/pkg/gen"
 )
 
 const (
@@ -34,7 +33,7 @@ type GeneratorT struct {
 type Generator = *GeneratorT
 
 func init() {
-	gen.RegisterGenerator("bunyan", NewGenerator)
+	config.RegisterGenerator("bunyan", NewGenerator)
 }
 
 func BuildLevelChooser(level config.Level) *wr.Chooser {
@@ -71,7 +70,7 @@ func BuilderLoggerChooser(loggers []config.Logger) *wr.Chooser {
 	return r
 }
 
-func NewGenerator(config config.Config, app config.App) gen.Generator {
+func NewGenerator(config config.Config, app config.App) config.Generator {
 	return &GeneratorT{
 		config:        config,
 		app:           app,

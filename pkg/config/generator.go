@@ -1,22 +1,19 @@
-package gen
+package config
 
 import (
 	"fmt"
 	"time"
-
-	wr "github.com/mroth/weightedrand"
-	"github.com/qiangyt/loggen/pkg/config"
 )
 
 type Generator interface {
 	NextPid() uint32
 	NextTimestamp(timestamp *time.Time) string
 	NextLevel() uint32
-	App() config.App
+	App() App
 	NextLogger() string
 }
 
-type GeneratorBuilder func(config config.Config, app config.App) Generator
+type GeneratorBuilder func(config Config, app App) Generator
 
 var (
 	generatorBuilders map[string]GeneratorBuilder
@@ -38,7 +35,7 @@ func HasGenerator(name string) bool {
 	return found
 }
 
-func BuildGenerator(config config.Config, app config.App) Generator {
+func BuildGenerator(config Config, app App) Generator {
 	builder, found := generatorBuilders[app.Type]
 	if !found {
 		panic(fmt.Errorf("invalid app(name=%s) type: %s", app.Name, app.Type))
@@ -54,15 +51,12 @@ func EnumerateGeneratorNames() []string {
 	return r
 }
 
-func CreateAppChooser(cfg config.Config) *wr.Chooser {
-	choices := []wr.Choice{}
-	for _, app := range cfg.Apps {
-		choices = append(choices, wr.Choice{
-			Item:   BuildGenerator(cfg, app),
-			Weight: uint(app.Weight),
-		})
+func IsValidGeneratorName(name string) bool {
+	names := EnumerateGeneratorNames()
+	for _, n := range names {
+		if name == n {
+			return true
+		}
 	}
-
-	r, _ := wr.NewChooser(choices...)
-	return r
+	return false
 }

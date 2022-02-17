@@ -42,11 +42,15 @@ func (i App) NormalizeName(hint string) {
 }
 
 func (i App) NormalizeType(hint string) {
-	if len(i.Type) == 0 {
-		panic(fmt.Errorf("missing %s.type", hint))
+	name := i.Type
+
+	if len(name) == 0 {
+		panic(fmt.Errorf("missing %s.name", hint))
 	}
-	if i.Type != "bunyan" {
-		panic(fmt.Errorf("%s.type: %s is not supported", hint, i.Type))
+
+	if !IsValidGeneratorName(name) {
+		panic(fmt.Errorf("%s.generator: %s is not supported; availables: [%v]",
+			hint, name, EnumerateGeneratorNames()))
 	}
 }
 

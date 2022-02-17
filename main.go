@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/qiangyt/loggen/pkg/config"
-	"github.com/qiangyt/loggen/pkg/gen"
 	"github.com/qiangyt/loggen/pkg/options"
 
 	_ "github.com/qiangyt/loggen/pkg/gen/bunyan"
@@ -29,13 +28,11 @@ func main() {
 
 	cfg := config.NewConfigWithOptions(options)
 
-	appChooser := gen.CreateAppChooser(cfg)
-
 	timestamp := time.Time{}
 	var n uint32
 
 	for n = 0; n < cfg.Number; n++ {
-		g := appChooser.Pick().(gen.Generator)
+		g := cfg.ChooseGeneratorForApp()
 		timestampText := g.NextTimestamp(&timestamp)
 
 		lineObj := map[string]interface{}{
