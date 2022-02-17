@@ -3,7 +3,7 @@ timestamp:
   intervalMin: 10 # minimal time interval, as milliseconds
   intervalMax: 10000 # maximal time interval, as milliseconds
 
-number: 10 # number of log lines to generate
+number: 100 # number of log lines to generate
 
 apps:
   - name: nginx
