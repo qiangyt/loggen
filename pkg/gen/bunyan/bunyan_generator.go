@@ -64,26 +64,29 @@ func NewGenerator(config config.Config, app config.App) gen.Generator {
 	}
 }
 
+func (i Generator) App() config.App {
+	return i.app
+}
+
 func (i Generator) NextPid() uint32 {
 	index := rand.Intn(len(i.pIdArray))
 	return i.pIdArray[index]
 }
 
-func (i Generator) NextTimestamp(timestamp time.Time) (string, time.Time) {
-	var newTimestamp time.Time
+func (i Generator) NextTimestamp(timestamp *time.Time) string {
 	cfg := i.config.Timestamp
 
 	if timestamp.IsZero() {
-		newTimestamp = cfg.Begin
+		*timestamp = cfg.Begin
 	} else {
 		intervalDeta := cfg.IntervalMax - cfg.IntervalMin
 		interval := cfg.IntervalMin + uint32(rand.Int31n(int32(intervalDeta)))
 		dura := time.Duration(interval * 1000 * 1000)
 
-		newTimestamp = timestamp.Add(dura)
+		*timestamp = timestamp.Add(dura)
 	}
 
-	return newTimestamp.Format(TIMESTAMP_LAYOUT), newTimestamp
+	return timestamp.Format(TIMESTAMP_LAYOUT)
 }
 
 func (i Generator) NextLevel() uint32 {

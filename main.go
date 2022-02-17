@@ -47,19 +47,19 @@ func main() {
 
 	timestamp := time.Time{}
 	var n uint32
-	for n = 0; n < cfg.Number; n++ {
-		generator := appChooser.Pick().(gen.Generator)
 
-		var timestampText string
-		timestampText, timestamp = generator.NextTimestamp(timestamp)
+	for n = 0; n < cfg.Number; n++ {
+		g := appChooser.Pick().(gen.Generator)
+
+		timestampText := g.NextTimestamp(&timestamp)
 
 		lineObj := map[string]interface{}{
 			"time":     timestampText,
-			"level":    generator.NextLevel(),
-			"pid":      generator.NextPid(),
+			"level":    g.NextLevel(),
+			"pid":      g.NextPid(),
 			"v":        0,
 			"id":       "Config",
-			"name":     "tca_amplicon_admin",
+			"name":     g.App().Name,
 			"hostname": "db9c2f8e0b7c",
 			"path":     "/usr/src/app/config/config.json",
 			"msg":      "no json configuration file",

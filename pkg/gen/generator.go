@@ -9,8 +9,9 @@ import (
 
 type Generator interface {
 	NextPid() uint32
-	NextTimestamp(timestamp time.Time) (string, time.Time)
+	NextTimestamp(timestamp *time.Time) string
 	NextLevel() uint32
+	App() config.App
 }
 
 type GeneratorBuilder func(config config.Config, app config.App) Generator
