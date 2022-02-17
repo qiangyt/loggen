@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+
+	wr "github.com/mroth/weightedrand"
 )
 
 const (
@@ -15,7 +17,8 @@ type AppT struct {
 	Pid    Pid
 	Weight uint32
 
-	Loggers []Logger
+	Loggers   []Logger
+	Generator Generator
 }
 
 type App = *AppT
@@ -24,11 +27,11 @@ func NewApp() App {
 	return &AppT{}
 }
 
-func (i App) Normalize(hint string) {
+func (i App) Normalize(cfg Config, hint string) {
 	i.NormalizeName(hint)
 	hint = fmt.Sprintf("%s(name=%s)", hint, i.Name)
 
-	i.NormalizeType(hint)
+	i.NormalizeType(cfg, hint)
 	i.NormalzieLevel()
 	i.NormalizePid(hint)
 	i.NormalizeWeight()
@@ -41,7 +44,7 @@ func (i App) NormalizeName(hint string) {
 	}
 }
 
-func (i App) NormalizeType(hint string) {
+func (i App) NormalizeType(cfg Config, hint string) {
 	name := i.Type
 
 	if len(name) == 0 {
@@ -51,6 +54,15 @@ func (i App) NormalizeType(hint string) {
 	if !IsValidGeneratorName(name) {
 		panic(fmt.Errorf("%s.generator: %s is not supported; availables: [%v]",
 			hint, name, EnumerateGeneratorNames()))
+	}
+
+	i.Generator = BuildGenerator(cfg, i)
+}
+
+func (i App) BuildChoice() wr.Choice {
+	return wr.Choice{
+		Item:   i,
+		Weight: uint(i.Weight),
 	}
 }
 

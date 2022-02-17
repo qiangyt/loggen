@@ -125,23 +125,20 @@ func (i Config) NormalizeApps() {
 		}
 		byNames[name] = app
 
-		app.Normalize(hint)
+		app.Normalize(i, hint)
 	}
 }
 
 func (i Config) BuildAppChooser() *wr.Chooser {
 	choices := []wr.Choice{}
 	for _, app := range i.Apps {
-		choices = append(choices, wr.Choice{
-			Item:   BuildGenerator(i, app),
-			Weight: uint(app.Weight),
-		})
+		choices = append(choices, app.BuildChoice())
 	}
 
 	r, _ := wr.NewChooser(choices...)
 	return r
 }
 
-func (i Config) ChooseGeneratorForApp() Generator {
-	return i.appChooser.Pick().(Generator)
+func (i Config) ChooseApp() App {
+	return i.appChooser.Pick().(App)
 }

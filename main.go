@@ -32,7 +32,9 @@ func main() {
 	var n uint32
 
 	for n = 0; n < cfg.Number; n++ {
-		g := cfg.ChooseGeneratorForApp()
+		app := cfg.ChooseApp()
+		g := app.Generator
+
 		timestampText := g.NextTimestamp(&timestamp)
 
 		lineObj := map[string]interface{}{
@@ -41,7 +43,7 @@ func main() {
 			"pid":      g.NextPid(),
 			"v":        0,
 			"id":       g.NextLogger(),
-			"name":     g.App().Name,
+			"name":     app.Name,
 			"hostname": "db9c2f8e0b7c",
 			"path":     "/usr/src/app/config/config.json",
 			"msg":      "no json configuration file",
