@@ -13,6 +13,7 @@ type LoggerT struct {
 	Name    string
 	Weight  uint32
 	Message string
+	Path    string
 }
 
 type Logger = *LoggerT
@@ -25,6 +26,7 @@ func (me Logger) Normalize(hint string) {
 	me.NormalizeName(hint)
 	me.NormalizeWeight()
 	me.NormalizeMessage()
+	me.NormalizePath(hint)
 }
 
 func (me Logger) NormalizeName(hint string) {
@@ -42,5 +44,11 @@ func (me Logger) NormalizeWeight() {
 func (me Logger) NormalizeMessage() {
 	if len(me.Message) == 0 {
 		me.Message = DefaultMessagFilePath
+	}
+}
+
+func (me Logger) NormalizePath(hint string) {
+	if len(me.Path) == 0 {
+		panic(fmt.Errorf("missing %s.path", hint))
 	}
 }

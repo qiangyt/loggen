@@ -23,8 +23,10 @@ apps:
     loggers:
       - name: req
         weight: 1
+        path: req_handler.c
       - name: resp
         weight: 1
+        path: resp_handler.c
     hosts:
       - name: nginx-server-1
         weight: 1
@@ -47,8 +49,10 @@ apps:
     loggers:
       - name: dispatcher
         weight: 3
+        path: dispatch_handler.lua
       - name: backend
         weight: 1
+        path: backend_handler.lua
     hosts:
       - name: api-gateway-server-1
         weight: 1
@@ -72,10 +76,13 @@ apps:
       - name: order-controller
         weight: 1
         message: res:/message.default.txt
+        path: OrderControllere.java
       - name: order-service
         weight: 3
+        path: OrderService.java
       - name: order-repository
         weight: 6
+        path: OrderRepository.java
     hosts:
       - name: order-server-1
         weight: 1
@@ -100,10 +107,13 @@ apps:
     loggers:
       - name: account-controller
         weight: 1
+        path: AccountController.java
       - name: account-service
         weight: 3
+        path: AccountService.java
       - name: account-repository
         weight: 6
+        path: AccountRepository.java
     hosts:
       - name: account-server-1
         weight: 1
@@ -127,12 +137,16 @@ apps:
       amount: 3
     loggers:
       - name: pay-controller
+        path: PayController.java
         weight: 1
       - name: pay-service
+        path: PayService.java
         weight: 3
       - name: pay-repository
         weight: 6
+        path: PayRepository.java
       - name: pay-gateway
+        path: PayGateway.java
         weight: 10
     hosts:
       - name: pay-server-1

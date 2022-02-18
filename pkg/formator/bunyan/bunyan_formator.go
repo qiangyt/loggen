@@ -42,7 +42,7 @@ func (me Formator) Format(state config.State) string {
 		"id":       loggerStage.Config.Name,
 		"name":     appState.Config.Name,
 		"hostname": appState.Host.Config.Name,
-		"path":     "/usr/src/app/config/config.json",
+		"path":     loggerStage.Config.Path,
 		"msg":      loggerStage.Message,
 	}
 	r, _ := json.Marshal(obj)
