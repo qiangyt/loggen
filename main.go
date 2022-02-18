@@ -7,6 +7,7 @@ import (
 	"github.com/qiangyt/loggen/pkg/config"
 	_ "github.com/qiangyt/loggen/pkg/formator/bunyan"
 	"github.com/qiangyt/loggen/pkg/gen"
+	_ "github.com/qiangyt/loggen/pkg/res"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"

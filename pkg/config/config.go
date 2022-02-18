@@ -41,7 +41,7 @@ func NewConfigWithOptions(options Options) Config {
 		if _io.FileExists(configFilePath) {
 			yamlText = _io.ReadTextFile(configFilePath)
 		} else {
-			yamlText = res.GetDefaultConfigYaml()
+			yamlText = res.ReadDefaultConfigYaml()
 		}
 	}
 

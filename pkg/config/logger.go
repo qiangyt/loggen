@@ -5,7 +5,8 @@ import (
 )
 
 const (
-	DefaultLoggerWeight uint32 = 1
+	DefaultLoggerWeight   uint32 = 1
+	DefaultMessagFilePath        = "res:/message.default.txt"
 )
 
 type LoggerT struct {
@@ -39,7 +40,7 @@ func (me Logger) NormalizeWeight() {
 }
 
 func (me Logger) NormalizeMessage() {
-
-	//loggerChooser: BuilderLoggerChooser(app.Loggers),
-	//"message: res:/message.default.txt"
+	if len(me.Message) == 0 {
+		me.Message = DefaultMessagFilePath
+	}
 }

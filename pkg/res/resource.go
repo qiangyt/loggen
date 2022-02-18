@@ -34,8 +34,12 @@ type ResourceT struct {
 
 type Resource = *ResourceT
 
-func New(path string) Resource {
+func NewResourceWithPath(path string) Resource {
 	return &ResourceT{path: path}
+}
+
+func NewResourceWithUrl(url string) Resource {
+	return NewResourceWithPath(ResourcePath(url))
 }
 
 func (me Resource) Path() string {
@@ -82,10 +86,6 @@ func (me Resource) ReadString() string {
 	return string(me.ReadBytes())
 }
 
-func GetDefaultConfigYaml() string {
-	return New("/config.default.yaml").ReadString()
-}
-
-func GetDefaultMessageFile() string {
-	return New("/message.default.txt").ReadString()
+func ReadDefaultConfigYaml() string {
+	return NewResourceWithPath("/config.default.yaml").ReadString()
 }

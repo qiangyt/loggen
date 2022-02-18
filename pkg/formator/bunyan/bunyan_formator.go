@@ -32,17 +32,18 @@ func init() {
 
 func (me Formator) Format(state config.State) string {
 	appState := state.App
+	loggerStage := appState.Logger
 
 	obj := map[string]interface{}{
 		"time":     state.Timestamp.Format(TIMESTAMP_LAYOUT),
 		"level":    FormatLevel(appState.Level),
 		"pid":      appState.Pid,
 		"v":        0,
-		"id":       appState.Logger.Config.Name,
+		"id":       loggerStage.Config.Name,
 		"name":     appState.Config.Name,
 		"hostname": "db9c2f8e0b7c",
 		"path":     "/usr/src/app/config/config.json",
-		"msg":      "no json configuration file",
+		"msg":      loggerStage.Message,
 	}
 	r, _ := json.Marshal(obj)
 	return string(r)

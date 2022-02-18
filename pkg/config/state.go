@@ -6,7 +6,8 @@ import (
 
 // ------------
 type LoggerStateT struct {
-	Config Logger
+	Config  Logger
+	Message string
 }
 
 type LoggerState = *LoggerStateT

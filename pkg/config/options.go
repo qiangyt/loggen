@@ -24,7 +24,7 @@ type Options = *OptionsT
 
 // PrintConfigTemplate ...
 func (i Options) PrintConfigTemplate() {
-	fmt.Println(res.GetDefaultConfigYaml())
+	fmt.Println(res.ReadDefaultConfigYaml())
 }
 
 func NewOptionsWithCommandLine(version string) (bool, Options) {
