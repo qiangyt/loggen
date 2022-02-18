@@ -7,7 +7,7 @@ number: 100 # number of log lines to generate
 
 apps:
   - name: nginx
-    generator: bunyan
+    format: bunyan
     weight: 4
     level:
       weightTrace: 5 # random weight of TRACE level
@@ -26,7 +26,7 @@ apps:
       - name: resp
         weight: 1
   - name: api-gateway
-    generator: bunyan
+    format: bunyan
     weight: 2
     level:
       weightTrace: 5
@@ -45,7 +45,7 @@ apps:
       - name: backend
         weight: 1
   - name: order-app
-    generator: bunyan
+    format: bunyan
     weight: 6
     level:
       weightTrace: 5
@@ -61,12 +61,13 @@ apps:
     loggers:
       - name: order-controller
         weight: 1
+        message: res:/message.default.txt
       - name: order-service
         weight: 3
       - name: order-repository
         weight: 6
   - name: account-app
-    generator: bunyan
+    format: bunyan
     weight: 8
     level:
       weightTrace: 5
@@ -78,7 +79,7 @@ apps:
     pid:
       begin: 4000
       end: 5000
-      amount: 3    
+      amount: 3
     loggers:
       - name: account-controller
         weight: 1
@@ -87,7 +88,7 @@ apps:
       - name: account-repository
         weight: 6
   - name: pay-app
-    generator: bunyan
+    format: bunyan
     weight: 3
     level:
       weightTrace: 5
@@ -99,7 +100,7 @@ apps:
     pid:
       begin: 5000
       end: 6000
-      amount: 3   
+      amount: 3
     loggers:
       - name: pay-controller
         weight: 1

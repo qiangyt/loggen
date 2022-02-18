@@ -85,3 +85,7 @@ func (i Resource) ReadString() string {
 func GetDefaultConfigYaml() string {
 	return New("/config.default.yaml").ReadString()
 }
+
+func GetDefaultMessageFile() string {
+	return New("/message.default.txt").ReadString()
+}

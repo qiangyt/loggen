@@ -11,14 +11,15 @@ const (
 )
 
 type AppT struct {
-	Name      string
-	Generator string
-	Level     Level
-	Pid       Pid
-	Weight    uint32
+	Name    string
+	Format  string
+	Level   Level
+	Pid     Pid
+	Weight  uint32
+	Loggers []Logger
 
-	Loggers      []Logger
-	GeneratorObj Generator `yaml:"-"`
+	Formator      Formator    `yaml:"-"`
+	loggerChooser *wr.Chooser `yaml:"-"`
 }
 
 type App = *AppT
@@ -27,15 +28,34 @@ func NewApp() App {
 	return &AppT{}
 }
 
+func (i App) Initialize(cfg Config) {
+	i.Level.Initialize()
+	i.Formator = GetFormator(i.Name, i.Format)
+	i.Pid.Initialize()
+	i.loggerChooser = BuildLoggerChooser(i.Loggers)
+}
+
+func (i App) NextLevel() uint32 {
+	return i.Level.Next()
+}
+
+func (i App) NextPid() uint32 {
+	return i.Pid.Next()
+}
+
+func (i App) NextLogger() Logger {
+	logger := i.loggerChooser.Pick().(Logger)
+	return logger
+}
+
 func (i App) Normalize(cfg Config, hint string) {
 	i.NormalizeName(hint)
 	hint = fmt.Sprintf("%s(name=%s)", hint, i.Name)
 
-	i.NormalizeGenerator(cfg, hint)
+	i.NormalizeFormat(hint)
 	i.NormalzieLevel()
 	i.NormalizePid(hint)
 	i.NormalizeWeight()
-	i.NormalizeLoggers(hint)
 }
 
 func (i App) NormalizeName(hint string) {
@@ -44,19 +64,17 @@ func (i App) NormalizeName(hint string) {
 	}
 }
 
-func (i App) NormalizeGenerator(cfg Config, hint string) {
-	name := i.Generator
+func (i App) NormalizeFormat(hint string) {
+	format := i.Format
 
-	if len(name) == 0 {
+	if len(format) == 0 {
 		panic(fmt.Errorf("missing %s.generator", hint))
 	}
 
-	if !IsValidGeneratorName(name) {
-		panic(fmt.Errorf("%s.generator: %s is not supported; availables: [%v]",
-			hint, name, EnumerateGeneratorNames()))
+	if !IsValidFormatorName(format) {
+		panic(fmt.Errorf("%s.format: %s is not supported; availables: [%v]",
+			hint, format, EnumerateFormatorNames()))
 	}
-
-	i.GeneratorObj = BuildGenerator(cfg, i)
 }
 
 func (i App) BuildChoice() wr.Choice {
@@ -103,4 +121,14 @@ func (i App) NormalizeLoggers(hint string) {
 
 		logger.Normalize(loggerHint)
 	}
+}
+
+func BuildAppChooser(apps []App) *wr.Chooser {
+	choices := []wr.Choice{}
+	for _, app := range apps {
+		choices = append(choices, app.BuildChoice())
+	}
+
+	r, _ := wr.NewChooser(choices...)
+	return r
 }

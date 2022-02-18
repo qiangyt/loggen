@@ -1,15 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"time"
 
 	"github.com/qiangyt/loggen/pkg/config"
+	_ "github.com/qiangyt/loggen/pkg/formator/bunyan"
 	"github.com/qiangyt/loggen/pkg/options"
-
-	_ "github.com/qiangyt/loggen/pkg/gen/bunyan"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"
@@ -27,30 +25,21 @@ func main() {
 	}
 
 	cfg := config.NewConfigWithOptions(options)
+	cfg.Normalize()
+	cfg.Initialize()
 
 	timestamp := time.Time{}
 	var n uint32
 
 	for n = 0; n < cfg.Number; n++ {
 		app := cfg.ChooseApp()
-		g := app.GeneratorObj
+		g := app.Formator
 
-		timestampText := g.NextTimestamp(&timestamp)
+		cfg.Timestamp.Next(&timestamp)
+		level := app.NextLevel()
 
-		lineObj := map[string]interface{}{
-			"time":     timestampText,
-			"level":    g.NextLevel(),
-			"pid":      g.NextPid(),
-			"v":        0,
-			"id":       g.NextLogger(),
-			"name":     app.Name,
-			"hostname": "db9c2f8e0b7c",
-			"path":     "/usr/src/app/config/config.json",
-			"msg":      "no json configuration file",
-		}
-		lineTxt, _ := json.Marshal(lineObj)
-
-		fmt.Println(string(lineTxt))
+		line := g.Format(cfg, timestamp, level, app)
+		fmt.Println(string(line))
 	}
 
 }

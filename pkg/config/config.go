@@ -18,9 +18,10 @@ const (
 )
 
 type ConfigT struct {
-	Timestamp  Timestamp
-	Number     uint32
-	Apps       []App
+	Timestamp Timestamp
+	Number    uint32
+	Apps      []App
+
 	appChooser *wr.Chooser `yaml:"-"`
 }
 
@@ -71,7 +72,6 @@ func NewConfigWithOptions(options options.Options) Config {
 		}
 
 		r.Apps = []App{app}
-		r.appChooser = r.BuildAppChooser()
 	}
 
 	return r
@@ -84,10 +84,6 @@ func NewConfigWithYaml(yamlText string) Config {
 		panic(errors.Wrap(err, "failed to parse yaml"))
 	}
 
-	r.Normalize()
-
-	r.appChooser = r.BuildAppChooser()
-
 	return r
 }
 
@@ -95,6 +91,15 @@ func (i Config) Normalize() {
 	i.NormalizeTimestamp()
 	i.NormalizeNumber()
 	i.NormalizeApps()
+}
+
+func (i Config) Initialize() {
+	i.Timestamp.Initialize()
+
+	i.appChooser = BuildAppChooser(i.Apps)
+	for _, app := range i.Apps {
+		app.Initialize(i)
+	}
 }
 
 func (i Config) NormalizeTimestamp() {
@@ -127,16 +132,6 @@ func (i Config) NormalizeApps() {
 
 		app.Normalize(i, hint)
 	}
-}
-
-func (i Config) BuildAppChooser() *wr.Chooser {
-	choices := []wr.Choice{}
-	for _, app := range i.Apps {
-		choices = append(choices, app.BuildChoice())
-	}
-
-	r, _ := wr.NewChooser(choices...)
-	return r
 }
 
 func (i Config) ChooseApp() App {
