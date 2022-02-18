@@ -15,6 +15,7 @@ type AppT struct {
 	Pid     Pid
 	Weight  uint32
 	Loggers []Logger
+	Hosts   []Host
 
 	//Formator formator.Formator `yaml:"-"`
 }
@@ -34,6 +35,7 @@ func (me App) Normalize(cfg Config, hint string) {
 	me.NormalizePid(hint)
 	me.NormalizeWeight()
 	me.NormalizeLoggers(hint)
+	me.NormalizeHosts(hint)
 }
 
 func (me App) NormalizeName(hint string) {
@@ -48,13 +50,6 @@ func (me App) NormalizeFormat(hint string) {
 	if len(format) == 0 {
 		panic(fmt.Errorf("missing %s.generator", hint))
 	}
-
-	/*if !formator.IsValidFormatorName(format) {
-		panic(fmt.Errorf("%s.format: %s is not supported; availables: [%v]",
-			hint, format, formator.EnumerateFormatorNames()))
-	}*/
-
-	//me.Formator = formator.GetFormator(me.Name, format)
 }
 
 func (me App) NormalizeWeight() {
@@ -84,7 +79,7 @@ func (me App) NormalizeLoggers(hint string) {
 
 	byNames := map[string]Logger{}
 	for idx, logger := range me.Loggers {
-		loggerHint := fmt.Sprintf("%s.logger[%d]", hint, idx)
+		loggerHint := fmt.Sprintf("%s.loggers[%d]", hint, idx)
 
 		name := logger.Name
 		if _, found := byNames[name]; found {
@@ -93,5 +88,24 @@ func (me App) NormalizeLoggers(hint string) {
 		byNames[name] = logger
 
 		logger.Normalize(loggerHint)
+	}
+}
+
+func (me App) NormalizeHosts(hint string) {
+	if len(me.Hosts) == 0 {
+		panic(fmt.Errorf("%s: at least 1 host is required", hint))
+	}
+
+	byNames := map[string]Host{}
+	for idx, host := range me.Hosts {
+		hostHint := fmt.Sprintf("%s.hosts[%d]", hint, idx)
+
+		name := host.Name
+		if _, found := byNames[name]; found {
+			panic(fmt.Errorf("%s.name(%s) is duplicated", hostHint, name))
+		}
+		byNames[name] = host
+
+		host.Normalize(hostHint)
 	}
 }

@@ -13,6 +13,13 @@ type LoggerStateT struct {
 type LoggerState = *LoggerStateT
 
 // ------------
+type HostStateT struct {
+	Config Host
+}
+
+type HostState = *HostStateT
+
+// ------------
 const (
 	LevelTrace uint32 = iota
 	LevelDebug
@@ -29,6 +36,7 @@ type AppStateT struct {
 	Level  uint32
 	Pid    uint32
 	Logger LoggerState
+	Host   HostState
 }
 
 type AppState = *AppStateT

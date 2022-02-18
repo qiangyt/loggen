@@ -41,7 +41,7 @@ func (me Formator) Format(state config.State) string {
 		"v":        0,
 		"id":       loggerStage.Config.Name,
 		"name":     appState.Config.Name,
-		"hostname": "db9c2f8e0b7c",
+		"hostname": appState.Host.Config.Name,
 		"path":     "/usr/src/app/config/config.json",
 		"msg":      loggerStage.Message,
 	}

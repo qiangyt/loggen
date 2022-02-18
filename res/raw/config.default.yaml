@@ -25,6 +25,11 @@ apps:
         weight: 1
       - name: resp
         weight: 1
+    hosts:
+      - name: nginx-server-1
+        weight: 1
+      - name: nginx-server-2
+        weight: 1
   - name: api-gateway
     format: bunyan
     weight: 2
@@ -43,6 +48,11 @@ apps:
       - name: dispatcher
         weight: 3
       - name: backend
+        weight: 1
+    hosts:
+      - name: api-gateway-server-1
+        weight: 1
+      - name: api-gateway-server-2
         weight: 1
   - name: order-app
     format: bunyan
@@ -66,6 +76,13 @@ apps:
         weight: 3
       - name: order-repository
         weight: 6
+    hosts:
+      - name: order-server-1
+        weight: 1
+      - name: order-server-2
+        weight: 1
+      - name: order-server-3
+        weight: 1
   - name: account-app
     format: bunyan
     weight: 8
@@ -87,6 +104,13 @@ apps:
         weight: 3
       - name: account-repository
         weight: 6
+    hosts:
+      - name: account-server-1
+        weight: 1
+      - name: account-server-2
+        weight: 1
+      - name: account-server-3
+        weight: 1
   - name: pay-app
     format: bunyan
     weight: 3
@@ -110,3 +134,10 @@ apps:
         weight: 6
       - name: pay-gateway
         weight: 10
+    hosts:
+      - name: pay-server-1
+        weight: 1
+      - name: pay-server-2
+        weight: 1
+      - name: pay-server-3
+        weight: 1
