@@ -1,4 +1,4 @@
-package options
+package config
 
 import (
 	"fmt"
@@ -27,7 +27,7 @@ func (i Options) PrintConfigTemplate() {
 	fmt.Println(res.GetDefaultConfigYaml())
 }
 
-func WithCommandLine(version string) (bool, Options) {
+func NewOptionsWithCommandLine(version string) (bool, Options) {
 
 	r := &OptionsT{
 		Debug:   false,

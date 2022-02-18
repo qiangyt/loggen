@@ -2,8 +2,6 @@ package config
 
 import (
 	"fmt"
-
-	wr "github.com/mroth/weightedrand"
 )
 
 const (
@@ -18,34 +16,13 @@ type AppT struct {
 	Weight  uint32
 	Loggers []Logger
 
-	Formator      Formator    `yaml:"-"`
-	loggerChooser *wr.Chooser `yaml:"-"`
+	//Formator formator.Formator `yaml:"-"`
 }
 
 type App = *AppT
 
 func NewApp() App {
 	return &AppT{}
-}
-
-func (i App) Initialize(cfg Config) {
-	i.Level.Initialize()
-	i.Formator = GetFormator(i.Name, i.Format)
-	i.Pid.Initialize()
-	i.loggerChooser = BuildLoggerChooser(i.Loggers)
-}
-
-func (i App) NextLevel() uint32 {
-	return i.Level.Next()
-}
-
-func (i App) NextPid() uint32 {
-	return i.Pid.Next()
-}
-
-func (i App) NextLogger() Logger {
-	logger := i.loggerChooser.Pick().(Logger)
-	return logger
 }
 
 func (i App) Normalize(cfg Config, hint string) {
@@ -56,6 +33,7 @@ func (i App) Normalize(cfg Config, hint string) {
 	i.NormalzieLevel()
 	i.NormalizePid(hint)
 	i.NormalizeWeight()
+	i.NormalizeLoggers(hint)
 }
 
 func (i App) NormalizeName(hint string) {
@@ -64,24 +42,19 @@ func (i App) NormalizeName(hint string) {
 	}
 }
 
-func (i App) NormalizeFormat(hint string) {
-	format := i.Format
+func (me App) NormalizeFormat(hint string) {
+	format := me.Format
 
 	if len(format) == 0 {
 		panic(fmt.Errorf("missing %s.generator", hint))
 	}
 
-	if !IsValidFormatorName(format) {
+	/*if !formator.IsValidFormatorName(format) {
 		panic(fmt.Errorf("%s.format: %s is not supported; availables: [%v]",
-			hint, format, EnumerateFormatorNames()))
-	}
-}
+			hint, format, formator.EnumerateFormatorNames()))
+	}*/
 
-func (i App) BuildChoice() wr.Choice {
-	return wr.Choice{
-		Item:   i,
-		Weight: uint(i.Weight),
-	}
+	//me.Formator = formator.GetFormator(me.Name, format)
 }
 
 func (i App) NormalizeWeight() {
@@ -121,14 +94,4 @@ func (i App) NormalizeLoggers(hint string) {
 
 		logger.Normalize(loggerHint)
 	}
-}
-
-func BuildAppChooser(apps []App) *wr.Chooser {
-	choices := []wr.Choice{}
-	for _, app := range apps {
-		choices = append(choices, app.BuildChoice())
-	}
-
-	r, _ := wr.NewChooser(choices...)
-	return r
 }

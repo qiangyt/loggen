@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"math/rand"
 	"time"
 )
 
@@ -31,22 +30,6 @@ func (i Timestamp) Normalize(hint string) {
 func (i Timestamp) NormalizeBegin() {
 	if i.Begin.IsZero() {
 		i.Begin = time.Now()
-	}
-}
-
-func (i Timestamp) Initialize() {
-	// nothing to do
-}
-
-func (i Timestamp) Next(timestamp *time.Time) {
-	if timestamp.IsZero() {
-		*timestamp = i.Begin
-	} else {
-		intervalDeta := i.IntervalMax - i.IntervalMin
-		interval := i.IntervalMin + uint32(rand.Int31n(int32(intervalDeta)))
-		dura := time.Duration(interval * 1000 * 1000)
-
-		*timestamp = timestamp.Add(dura)
 	}
 }
 

@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	wr "github.com/mroth/weightedrand"
 	"github.com/pkg/errors"
 	_io "github.com/qiangyt/loggen/pkg/io"
-	"github.com/qiangyt/loggen/pkg/options"
 	"github.com/qiangyt/loggen/pkg/res"
 	_ "github.com/qiangyt/loggen/res/statik"
 	"gopkg.in/yaml.v2"
@@ -21,8 +19,6 @@ type ConfigT struct {
 	Timestamp Timestamp
 	Number    uint32
 	Apps      []App
-
-	appChooser *wr.Chooser `yaml:"-"`
 }
 
 type Config = *ConfigT
@@ -31,7 +27,7 @@ func NewConfig() Config {
 	return &ConfigT{}
 }
 
-func NewConfigWithOptions(options options.Options) Config {
+func NewConfigWithOptions(options Options) Config {
 	var yamlText string
 
 	configFilePath := options.ConfigFilePath
@@ -93,15 +89,6 @@ func (i Config) Normalize() {
 	i.NormalizeApps()
 }
 
-func (i Config) Initialize() {
-	i.Timestamp.Initialize()
-
-	i.appChooser = BuildAppChooser(i.Apps)
-	for _, app := range i.Apps {
-		app.Initialize(i)
-	}
-}
-
 func (i Config) NormalizeTimestamp() {
 	if i.Timestamp == nil {
 		i.Timestamp = NewTimestamp()
@@ -132,8 +119,4 @@ func (i Config) NormalizeApps() {
 
 		app.Normalize(i, hint)
 	}
-}
-
-func (i Config) ChooseApp() App {
-	return i.appChooser.Pick().(App)
 }

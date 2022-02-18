@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"math/rand"
 )
 
 const (
@@ -15,30 +14,12 @@ type PidT struct {
 	Begin  uint32
 	End    uint32
 	Amount uint32
-
-	pIdArray []uint32 `yaml:"-"`
 }
 
 type Pid = *PidT
 
 func NewPid() Pid {
 	return &PidT{}
-}
-
-func (i Pid) Next() uint32 {
-	index := rand.Intn(len(i.pIdArray))
-	return i.pIdArray[index]
-}
-
-func (i Pid) Initialize() {
-	r := []uint32{}
-	for idx := 0; idx < int(i.Amount); idx++ {
-		pIdArange := int32(i.End - i.Begin)
-		pId := i.Begin + uint32(rand.Int31n(pIdArange))
-		r = append(r, pId)
-	}
-
-	i.pIdArray = r
 }
 
 func (i Pid) Normalize(hint string) {
