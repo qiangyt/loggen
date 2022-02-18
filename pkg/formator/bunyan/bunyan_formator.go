@@ -3,9 +3,9 @@ package bunyan
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/qiangyt/loggen/pkg/config"
+	"github.com/qiangyt/loggen/pkg/formator"
 )
 
 const (
@@ -27,19 +27,19 @@ type FormatorT struct {
 type Formator = *FormatorT
 
 func init() {
-	config.RegisterFormator("bunyan", &FormatorT{})
+	formator.RegisterFormator("bunyan", &FormatorT{})
 }
 
-func (i Formator) Format(cfg config.Config, timestamp time.Time, level uint32, app config.App) string {
-	logger := app.NextLogger()
+func (me Formator) Format(state config.State) string {
+	appState := state.App
 
 	obj := map[string]interface{}{
-		"time":     timestamp.Format(TIMESTAMP_LAYOUT),
-		"level":    FormatLevel(level),
-		"pid":      app.NextPid(),
+		"time":     state.Timestamp.Format(TIMESTAMP_LAYOUT),
+		"level":    FormatLevel(appState.Level),
+		"pid":      appState.Pid,
 		"v":        0,
-		"id":       logger.Name,
-		"name":     app.Name,
+		"id":       appState.Logger.Config.Name,
+		"name":     appState.Config.Name,
 		"hostname": "db9c2f8e0b7c",
 		"path":     "/usr/src/app/config/config.json",
 		"msg":      "no json configuration file",

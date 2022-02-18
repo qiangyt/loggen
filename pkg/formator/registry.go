@@ -1,13 +1,8 @@
-package config
+package formator
 
 import (
 	"fmt"
-	"time"
 )
-
-type Formator interface {
-	Format(cfg Config, timestamp time.Time, level uint32, app App) string
-}
 
 var (
 	formators map[string]Formator

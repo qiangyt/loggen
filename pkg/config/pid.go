@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"math/rand"
 )
 
 const (
@@ -15,8 +14,6 @@ type PidT struct {
 	Begin  uint32
 	End    uint32
 	Amount uint32
-
-	pIdArray []uint32 `yaml:"-"`
 }
 
 type Pid = *PidT
@@ -25,50 +22,34 @@ func NewPid() Pid {
 	return &PidT{}
 }
 
-func (i Pid) Next() uint32 {
-	index := rand.Intn(len(i.pIdArray))
-	return i.pIdArray[index]
+func (me Pid) Normalize(hint string) {
+	me.NormalizeBeginEnd(hint)
+	me.NormalizeAmount()
 }
 
-func (i Pid) Initialize() {
-	r := []uint32{}
-	for idx := 0; idx < int(i.Amount); idx++ {
-		pIdArange := int32(i.End - i.Begin)
-		pId := i.Begin + uint32(rand.Int31n(pIdArange))
-		r = append(r, pId)
-	}
-
-	i.pIdArray = r
-}
-
-func (i Pid) Normalize(hint string) {
-	i.NormalizeBeginEnd(hint)
-	i.NormalizeAmount()
-}
-
-func (i Pid) NormalizeBeginEnd(hint string) {
-	if i.Begin == 0 {
-		i.Begin = DefaultPidBegin
-		if i.End == 0 {
-			i.End = DefaultPidEnd
+func (me Pid) NormalizeBeginEnd(hint string) {
+	if me.Begin == 0 {
+		me.Begin = DefaultPidBegin
+		if me.End == 0 {
+			me.End = DefaultPidEnd
 		}
 	} else {
-		if i.End == 0 {
-			i.End = i.Begin + (DefaultPidEnd - DefaultPidBegin)
+		if me.End == 0 {
+			me.End = me.Begin + (DefaultPidEnd - DefaultPidBegin)
 		}
 	}
 
-	if i.End == 0 {
-		i.End = DefaultPidEnd
+	if me.End == 0 {
+		me.End = DefaultPidEnd
 	}
 
-	if i.Begin > i.End {
+	if me.Begin > me.End {
 		panic(fmt.Errorf("%s.begin must be <= %s.end", hint, hint))
 	}
 }
 
-func (i Pid) NormalizeAmount() {
-	if i.Amount == 0 {
-		i.Amount = DefaultPidAmount
+func (me Pid) NormalizeAmount() {
+	if me.Amount == 0 {
+		me.Amount = DefaultPidAmount
 	}
 }

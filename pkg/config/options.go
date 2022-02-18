@@ -1,4 +1,4 @@
-package options
+package config
 
 import (
 	"fmt"
@@ -27,7 +27,7 @@ func (i Options) PrintConfigTemplate() {
 	fmt.Println(res.GetDefaultConfigYaml())
 }
 
-func WithCommandLine(version string) (bool, Options) {
+func NewOptionsWithCommandLine(version string) (bool, Options) {
 
 	r := &OptionsT{
 		Debug:   false,
@@ -87,14 +87,14 @@ func WithCommandLine(version string) (bool, Options) {
 }
 
 // PrintVersion ...
-func (i Options) PrintVersion() {
-	fmt.Printf("version: %s\n", i.Version)
+func (me Options) PrintVersion() {
+	fmt.Printf("version: %s\n", me.Version)
 }
 
 // PrintHelp ...
-func (i Options) PrintHelp() {
+func (me Options) PrintHelp() {
 	fmt.Println("\nloggen: Log generator for jog(https://github.com/qiangyt/jog) development only.")
-	i.PrintVersion()
+	me.PrintVersion()
 	fmt.Println()
 
 	fmt.Println("Usage:")

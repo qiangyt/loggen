@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	wr "github.com/mroth/weightedrand"
 	"github.com/pkg/errors"
 	_io "github.com/qiangyt/loggen/pkg/io"
-	"github.com/qiangyt/loggen/pkg/options"
 	"github.com/qiangyt/loggen/pkg/res"
 	_ "github.com/qiangyt/loggen/res/statik"
 	"gopkg.in/yaml.v2"
@@ -21,8 +19,6 @@ type ConfigT struct {
 	Timestamp Timestamp
 	Number    uint32
 	Apps      []App
-
-	appChooser *wr.Chooser `yaml:"-"`
 }
 
 type Config = *ConfigT
@@ -31,7 +27,7 @@ func NewConfig() Config {
 	return &ConfigT{}
 }
 
-func NewConfigWithOptions(options options.Options) Config {
+func NewConfigWithOptions(options Options) Config {
 	var yamlText string
 
 	configFilePath := options.ConfigFilePath
@@ -87,41 +83,32 @@ func NewConfigWithYaml(yamlText string) Config {
 	return r
 }
 
-func (i Config) Normalize() {
-	i.NormalizeTimestamp()
-	i.NormalizeNumber()
-	i.NormalizeApps()
+func (me Config) Normalize() {
+	me.NormalizeTimestamp()
+	me.NormalizeNumber()
+	me.NormalizeApps()
 }
 
-func (i Config) Initialize() {
-	i.Timestamp.Initialize()
+func (me Config) NormalizeTimestamp() {
+	if me.Timestamp == nil {
+		me.Timestamp = NewTimestamp()
+	}
+	me.Timestamp.Normalize("timestamp")
+}
 
-	i.appChooser = BuildAppChooser(i.Apps)
-	for _, app := range i.Apps {
-		app.Initialize(i)
+func (me Config) NormalizeNumber() {
+	if me.Number == 0 {
+		me.Number = DefaultNumber
 	}
 }
 
-func (i Config) NormalizeTimestamp() {
-	if i.Timestamp == nil {
-		i.Timestamp = NewTimestamp()
-	}
-	i.Timestamp.Normalize("timestamp")
-}
-
-func (i Config) NormalizeNumber() {
-	if i.Number == 0 {
-		i.Number = DefaultNumber
-	}
-}
-
-func (i Config) NormalizeApps() {
-	if len(i.Apps) == 0 {
+func (me Config) NormalizeApps() {
+	if len(me.Apps) == 0 {
 		panic(errors.New("at least 1 app is required"))
 	}
 
 	byNames := map[string]App{}
-	for idx, app := range i.Apps {
+	for idx, app := range me.Apps {
 		hint := fmt.Sprintf("apps[%d]", idx)
 
 		name := app.Name
@@ -130,10 +117,6 @@ func (i Config) NormalizeApps() {
 		}
 		byNames[name] = app
 
-		app.Normalize(i, hint)
+		app.Normalize(me, hint)
 	}
-}
-
-func (i Config) ChooseApp() App {
-	return i.appChooser.Pick().(App)
 }
