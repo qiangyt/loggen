@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	_io "github.com/qiangyt/loggen/pkg/io"
 	"github.com/qiangyt/loggen/pkg/res"
@@ -16,16 +17,18 @@ const (
 )
 
 type ConfigT struct {
-	Timestamp Timestamp
-	Number    uint32
-	Apps      []App
+	Number uint32
+	Fields map[string]interface{}
+	Apps   map[string]App
+
+	timestampField       Timestamp
+	levelField           Level
+	randomMessageField   RandomMessage
+	weightedMessageField WeightedMessage
+	pidField             Pid
 }
 
 type Config = *ConfigT
-
-func NewConfig() Config {
-	return &ConfigT{}
-}
 
 func NewConfigWithOptions(options Options) Config {
 	var yamlText string
@@ -52,7 +55,8 @@ func NewConfigWithOptions(options Options) Config {
 	}
 
 	if !options.TimeBegin.IsZero() {
-		r.Timestamp.Begin = options.TimeBegin
+		timestampF := r.Fields["timestamp"].(Timestamp)
+		timestampF.Begin = options.TimeBegin
 	}
 
 	if len(options.AppName) > 0 {
@@ -70,30 +74,133 @@ func NewConfigWithOptions(options Options) Config {
 		r.Apps = []App{app}
 	}
 
+	r.Normalize()
+
+	return r
+}
+
+func NewConfig(input map[string]interface{}) Config {
+	r := &ConfigT{}
+	if err := mapstructure.Decode(input, &r); err != nil {
+		panic(errors.Wrapf(err, "failed decode config: %v", input))
+	}
 	return r
 }
 
 func NewConfigWithYaml(yamlText string) Config {
-	r := NewConfig()
-	err := yaml.Unmarshal([]byte(yamlText), &r)
+	m := map[string]interface{}{}
+	err := yaml.Unmarshal([]byte(yamlText), &m)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to parse yaml"))
 	}
 
+	r := NewConfig(m)
+	r.Normalize()
 	return r
 }
 
 func (me Config) Normalize() {
-	me.NormalizeTimestamp()
 	me.NormalizeNumber()
+	me.NormalizeFields()
+	me.NormalizeGenerators()
 	me.NormalizeApps()
 }
 
-func (me Config) NormalizeTimestamp() {
-	if me.Timestamp == nil {
-		me.Timestamp = NewTimestamp()
+func (me Config) NormalizeFields() {
+	for n, f := range me.Fields {
+		if n == "timestamp" {
+			//TODO: check type cast
+			me.timestampField = NewTimestamp("timestamp", f.(map[string]interface{}))
+		} else if n == "level" {
+			//TODO: check type cast
+			me.levelField = NewLevel("level", f.(map[string]interface{}))
+		} else if n == "timestamp" {
+			//TODO: check type cast
+			me.timestampField = NewTimestamp("timestamp", f.(map[string]interface{}))
+		} else if n == "timestamp" {
+			//TODO: check type cast
+			me.timestampField = NewTimestamp("timestamp", f.(map[string]interface{}))
+		} else if n == "timestamp" {
+			//TODO: check type cast
+			me.timestampField = NewTimestamp("timestamp", f.(map[string]interface{}))
+		}
 	}
-	me.Timestamp.Normalize("timestamp")
+
+	me.NormalizeTimestamp()
+
+	if me.levelField == nil {
+		me.levelField = NewLevel("level", map[string]interface{}{})
+	}
+	me.Fields["level"] = me.levelField
+	me.levelField.Normalize("level")
+
+	me.NormalizeRandomMessage()
+	me.NormalizeWeightedMessage()
+	me.NormalizePid()
+	me.NormalizeOtherFields()
+}
+
+func (me Config) NormalizeTimestamp() {
+	var f Timestamp
+	m, found := me.Fields["timestamp"]
+	if !found {
+		f = NewTimestamp("timestamp", map[string]interface{}{})
+	} else {
+		//TODO: check type cast
+		f = NewTimestamp("timestamp", m.(map[string]interface{}))
+	}
+
+	f.Normalize("timestamp")
+	me.timestampField = f
+	me.Fields["timestamp"] = f
+}
+
+func (me Config) NormalizeLevel() {
+	f, found := me.Fields["level"]
+	if !found {
+		me.levelField = NewLevel("level", map[string]interface{}{})
+	} else {
+		//TODO: check type cast
+		me.levelField = f.(Level)
+	}
+
+	me.levelField.Normalize("level")
+}
+
+func (me Config) NormalizeRandomMessage() {
+	f, found := me.Fields["random-message"]
+	if !found {
+		me.randomMessageField = NewRandomMessage("random-message", map[string]interface{}{})
+	} else {
+		//TODO: check type cast
+		me.randomMessageField = f.(RandomMessage)
+	}
+
+	me.randomMessageField.Normalize("random-message")
+}
+
+func (me Config) NormalizeWeightedMessage() {
+	f, found := me.Fields["weighted-message"]
+	if !found {
+		me.weightedMessageField = NewWeightedMessage("weighted-message", map[string]interface{}{})
+	} else {
+		//TODO: check type cast
+		me.weightedMessageField = f.(WeightedMessage)
+	}
+
+	me.weightedMessageField.Normalize("weighted-message")
+}
+
+func (me Config) NormalizePid() {
+	f, found := me.Fields["pid"]
+	if !found {
+		me.pidField = NewPid("pid", map[string]interface{}{})
+	} else {
+		//TODO: check type cast
+		me.pidField = f.(Pid)
+	}
+
+	me.pidField.Normalize("pid")
 }
 
 func (me Config) NormalizeNumber() {
@@ -119,4 +226,8 @@ func (me Config) NormalizeApps() {
 
 		app.Normalize(me, hint)
 	}
+}
+
+func (me Config) NormalizeGenerators() {
+	//TODO
 }

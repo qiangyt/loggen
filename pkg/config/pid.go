@@ -2,6 +2,9 @@ package config
 
 import (
 	"fmt"
+
+	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -18,8 +21,12 @@ type PidT struct {
 
 type Pid = *PidT
 
-func NewPid() Pid {
-	return &PidT{}
+func NewPid(hint string, input map[string]interface{}) Pid {
+	r := &PidT{}
+	if err := mapstructure.Decode(input, &r); err != nil {
+		panic(errors.Wrapf(err, "%s: failed decode pid: %v", hint, input))
+	}
+	return r
 }
 
 func (me Pid) Normalize(hint string) {

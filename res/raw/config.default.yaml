@@ -1,157 +1,76 @@
-timestamp:
-  begin: # Timestamp of first log line, default is now
-  intervalMin: 10 # minimal time interval, as milliseconds
-  intervalMax: 10000 # maximal time interval, as milliseconds
-
 number: 100 # number of log lines to generate
 
+presetFields:
+  timestamp:
+    begin: # Timestamp of first log line, default is now
+    intervalMin: 10 # minimal time interval, as milliseconds
+    intervalMax: 10000 # maximal time interval, as milliseconds
+  level: [TRACE(5), DEBUG(5), INFO(70), WARN(10), ERROR(5), FATAL(5)]
+  pid:
+    begin: 1000
+    end: 2000
+    amount: 1
+
+generators:
+  nginxAccess:
+    type: flat
+    template: '{{printf "%15s" .ipv4}} - - [{{printf "%21s" .timestamp}} 0800] "{{with .weightedHttpRequest}}{{.method}} {{.path}} HTTP/1.1" {{.responseCode}} {{.esponseLength}} "{{.server}}"{{end}} "{{.weightedHttpAgent}}"'
+    fields:
+      timestamp: {timeFormat: 02/Jan/2006:15:04:05}
+  bunyan:
+    type: json
+    schema:
+      time: '{{.timestamp}}'
+      level: '{{.app.level}}'
+      pid: '{{.app.pid}}'
+      v: 0
+      id: '{{.app.logger.name}}'
+      name: '{{.app.name}}'
+      hostname: '{{.app.host.name}}'
+      path: '{{.app.logger.file}}'
+      msg: '{{.app.logger.message}}'
+    fields:
+      timestamp: {timeFormat: '2006-01-02T15:04:05.000Z'}
+      level: [10(5), 20(5), 30(70), 40(10), 50(5), 60(5)]
+
 apps:
-  - name: nginx
-    format: bunyan
-    weight: 4
-    level:
-      weightTrace: 5 # random weight of TRACE level
-      weightDebug: 5 # random weight of DEBUG level
-      weightInfo: 70 # random weight of INFO level
-      weightWarn: 10 # random weight of WARN level
-      weightError: 5 # random weight of ERROR level
-      weightFatal: 5
-    pid:
-      begin: 1000 # begin of PID
-      end: 2000 # begin of PID
-      amount: 2 # amount of PID
-    loggers:
-      - name: req
-        weight: 1
-        path: req_handler.c
-      - name: resp
-        weight: 1
-        path: resp_handler.c
-    hosts:
-      - name: nginx-server-1
-        weight: 1
-      - name: nginx-server-2
-        weight: 1
-  - name: api-gateway
-    format: bunyan
-    weight: 2
-    level:
-      weightTrace: 5
-      weightDebug: 5
-      weightInfo: 70
-      weightWarn: 10
-      weightError: 5
-      weightFatal: 5
+  nginx*4:
+    generator: nginxAccess
+  apiGateway*2:
+    generator: bunyan
+    pid: {amount: 2}
+    logger:
+      values:
+        dispatcher*3:
+          file: dispatch_handler.lua
+          message: $randomMessage
+        backend*1:
+          file: backend_handler.lua
+          message: $randomMessage
+    host:
+      values:
+        apiw-1: {ip: 192.168.1.11}
+        apiw-2: {ip: 192.168.1.12}
+  application*6:
+    generator: bunyan
     pid:
       begin: 2000
       end: 3000
-      amount: 2
-    loggers:
-      - name: dispatcher
-        weight: 3
-        path: dispatch_handler.lua
-      - name: backend
-        weight: 1
-        path: backend_handler.lua
-    hosts:
-      - name: api-gateway-server-1
-        weight: 1
-      - name: api-gateway-server-2
-        weight: 1
-  - name: order-app
-    format: bunyan
-    weight: 6
-    level:
-      weightTrace: 5
-      weightDebug: 5
-      weightInfo: 70
-      weightWarn: 10
-      weightError: 5
-      weightFatal: 5
-    pid:
-      begin: 3000
-      end: 4000
       amount: 3
-    loggers:
-      - name: order-controller
-        weight: 1
-        message: res:/message.default.txt
-        path: OrderControllere.java
-      - name: order-service
-        weight: 3
-        path: OrderService.java
-      - name: order-repository
-        weight: 6
-        path: OrderRepository.java
-    hosts:
-      - name: order-server-1
-        weight: 1
-      - name: order-server-2
-        weight: 1
-      - name: order-server-3
-        weight: 1
-  - name: account-app
-    format: bunyan
-    weight: 8
-    level:
-      weightTrace: 5
-      weightDebug: 5
-      weightInfo: 70
-      weightWarn: 10
-      weightError: 5
-      weightFatal: 5
-    pid:
-      begin: 4000
-      end: 5000
-      amount: 3
-    loggers:
-      - name: account-controller
-        weight: 1
-        path: AccountController.java
-      - name: account-service
-        weight: 3
-        path: AccountService.java
-      - name: account-repository
-        weight: 6
-        path: AccountRepository.java
-    hosts:
-      - name: account-server-1
-        weight: 1
-      - name: account-server-2
-        weight: 1
-      - name: account-server-3
-        weight: 1
-  - name: pay-app
-    format: bunyan
-    weight: 3
-    level:
-      weightTrace: 5
-      weightDebug: 5
-      weightInfo: 70
-      weightWarn: 10
-      weightError: 5
-      weightFatal: 5
-    pid:
-      begin: 5000
-      end: 6000
-      amount: 3
-    loggers:
-      - name: pay-controller
-        path: PayController.java
-        weight: 1
-      - name: pay-service
-        path: PayService.java
-        weight: 3
-      - name: pay-repository
-        weight: 6
-        path: PayRepository.java
-      - name: pay-gateway
-        path: PayGateway.java
-        weight: 10
-    hosts:
-      - name: pay-server-1
-        weight: 1
-      - name: pay-server-2
-        weight: 1
-      - name: pay-server-3
-        weight: 1
+    logger:
+      values:
+        OrderController*1:
+          file: OrderController.java
+          message: $randomMessage
+        OrdreService*3:
+          file: OrderService.java
+          message: $randomMessage
+        OrderRepository*6:
+          file: OrderRepository.java
+          message: $randomMessage
+    host:
+      values:
+        app-1: {ip: 192.168.2.11}
+        app-2: {ip: 192.168.2.12}
+        app-3: {ip: 192.168.2.13}
+

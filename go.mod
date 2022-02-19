@@ -13,5 +13,6 @@ require (
 require (
 	github.com/agiledragon/gomonkey/v2 v2.3.1 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
+	github.com/mitchellh/mapstructure v1.4.3 // indirect
 	github.com/stretchr/testify v1.4.0 // indirect
 )

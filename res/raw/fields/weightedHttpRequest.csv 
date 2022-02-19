@@ -1,0 +1,7 @@
+# method, path, response-code, weight, protocol, response-length
+POST, /admin/agent/PullAgentAPI, 200, 2, HTTP/1.1, 135
+POST, /admin/job/ReportStep2ExecutingJobs, 200, 1, HTTP/1.1, 13687
+POST, /admin/run/SearchRun, 200, 1, HTTP/1.1, 123
+GET, /favicon.ico, 200, 2, HTTP/1.1, 67646
+GET, /ip, 200, 1, HTTP/1.1, 13
+GET, /static/js/vendor.aa2f1db8f6fc9e3cd0aa.js, 200, 1, HTTP/1.1, 756647

@@ -3,6 +3,9 @@ package config
 import (
 	"fmt"
 	"time"
+
+	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -12,14 +15,18 @@ const (
 
 type TimestampT struct {
 	Begin       time.Time
-	IntervalMin uint32 `yaml:"intervalMin"`
-	IntervalMax uint32 `yaml:"intervalMax"`
+	IntervalMin uint32 `mapstructure:"interval-min"`
+	IntervalMax uint32 `mapstructure:"interval-max"`
 }
 
 type Timestamp = *TimestampT
 
-func NewTimestamp() Timestamp {
-	return &TimestampT{}
+func NewTimestamp(hint string, input map[string]interface{}) Timestamp {
+	r := &TimestampT{}
+	if err := mapstructure.Decode(input, &r); err != nil {
+		panic(errors.Wrapf(err, "%s: failed decode timestamp: %v", hint, input))
+	}
+	return r
 }
 
 func (me Timestamp) Normalize(hint string) {
@@ -50,6 +57,6 @@ func (me Timestamp) NormalizeInterval(hint string) {
 	}
 
 	if me.IntervalMin > me.IntervalMax {
-		panic(fmt.Errorf("%s.intervalMin must be <= %s.intervalMax", hint, hint))
+		panic(fmt.Errorf("%s.interval-min must be <= %s.interval-max", hint, hint))
 	}
 }
