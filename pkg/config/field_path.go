@@ -3,13 +3,14 @@ package config
 import (
 	"fmt"
 	"strconv"
-	"strings"
 
+	"github.com/qiangyt/loggen/pkg/util/str"
 	_ "github.com/qiangyt/loggen/res/statik"
 )
 
 type FieldPathT struct {
 	path   string
+	parent string
 	name   string
 	weight int
 }
@@ -18,6 +19,10 @@ type FieldPath = *FieldPathT
 
 func (me FieldPath) String() string {
 	return me.Path()
+}
+
+func (me FieldPath) Parent() string {
+	return me.parent
 }
 
 func (me FieldPath) Path() string {
@@ -41,43 +46,33 @@ func HasWeight(weight int) bool {
 }
 
 func NewFieldPath(path string) FieldPath {
-	var name string
+	name, parent, _ := str.CutLast(path, ".", false, false, path)
 
-	indexOfDot := strings.LastIndexAny(path, ".")
-	if indexOfDot < 0 {
-		name = path
-	} else {
-		if indexOfDot == len(path)-1 {
-			panic(fmt.Errorf("invalid path: %s - '.' cannot be last character", path))
-		}
-		name = path[indexOfDot+1:]
-	}
-
-	name, weight := ParseFieldString(path, name)
-	if HasWeight(weight) {
+	if newName, weight := ParseFieldString(path, name); HasWeight(weight) {
 		return &FieldPathT{
 			path:   path,
-			name:   name,
+			parent: parent,
+			name:   newName,
 			weight: weight,
 		}
 	}
 
 	return &FieldPathT{
 		path:   path,
+		parent: parent,
 		name:   name,
 		weight: -1,
 	}
 }
 
 func ParseFieldString(hint string, s string) (string, int) {
-	indexOfStar := strings.LastIndexAny(s, "*") //TODO: escape * using **
-	if 0 < indexOfStar && indexOfStar < len(s)-1 {
-		if weight, err := strconv.Atoi(s[indexOfStar+1:]); err == nil {
+	if name, weightS, found := str.CutLast(s, "*", false, false, hint); found {
+		//TODO: escape * using **
+		if weight, err := strconv.Atoi(weightS); err == nil {
 			if weight < 0 {
-				panic(fmt.Errorf("%s - invalid weight %d (should be >= 0)", hint, weight))
+				panic(fmt.Errorf("%s - invalid weight %s (should be >= 0)", hint, weightS))
 			}
-			s = s[:indexOfStar]
-			return s, weight
+			return name, weight
 		}
 	}
 

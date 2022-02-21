@@ -2,8 +2,9 @@ package config
 
 import (
 	"fmt"
-	"strings"
 
+	_map "github.com/qiangyt/loggen/pkg/util/map"
+	"github.com/qiangyt/loggen/pkg/util/str"
 	_ "github.com/qiangyt/loggen/res/statik"
 )
 
@@ -22,31 +23,24 @@ func NewReferFieldT(target Field, name string, data map[string]interface{}) Refe
 }
 
 func TryToNormalizeStringReferFieldData(path FieldPath, presetFields map[string]Field, data string) (bool, map[string]interface{}) {
-	if strings.IndexAny(data, "$") == 0 {
-		refer := data[1:] // remove the leading '$'
-		dataM := map[string]interface{}{}
-		return true, NormalizeRefFieldData(path, presetFields, refer, dataM)
+	if refer, yes := str.TrimPrefix(data, "$"); yes {
+		return true, _normalizeRefFieldData(path, presetFields, refer, map[string]interface{}{})
 	}
 	return false, map[string]interface{}{}
 }
 
 func TryToNormalizeMapRefFieldData(path FieldPath, presetFields map[string]Field, data map[string]interface{}) (bool, map[string]interface{}) {
-	fType := data["type"].(FieldType)
-	if len(fType) > 0 {
+	if fType, found := _map.OptionalString(data, "type", path.Path()); !found {
 		if fType != FieldType_Refer {
 			return false, data
 		}
 	}
 
-	refer := data["refer"].(string) //TODO: must be string
-	if len(refer) == 0 {
-		refer = path.Name()
-	}
-
-	return true, NormalizeRefFieldData(path, presetFields, refer, data)
+	refer := _map.DefaultString(data, "refer", path.Name(), path.Path())
+	return true, _normalizeRefFieldData(path, presetFields, refer, data)
 }
 
-func NormalizeRefFieldData(path FieldPath, presetFields map[string]Field, refer string, data map[string]interface{}) map[string]interface{} {
+func _normalizeRefFieldData(path FieldPath, presetFields map[string]Field, refer string, data map[string]interface{}) map[string]interface{} {
 	var presetField Field
 	if presetField = presetFields[refer]; presetField == nil {
 		panic(fmt.Errorf("%s: preset field %s not found", path, refer))

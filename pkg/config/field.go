@@ -52,44 +52,32 @@ func BuildField(path FieldPath, presetFields map[string]Field, data interface{})
 }
 
 func NormalizeFieldData(path FieldPath, presetFields map[string]Field, data interface{}) map[string]interface{} {
-	r := _NormalizeFieldData(path, presetFields, data)
-	r["name"] = path.Name()
-	if path.HasWeight() {
-		r["weight"] = path.Weight()
-	}
-	return r
-}
-
-func _NormalizeFieldData(path FieldPath, presetFields map[string]Field, data interface{}) map[string]interface{} {
 	switch data.(type) {
-	case []string:
-		return NormalizeStringListFieldData(path, data.([]string))
+	case []string: //TODO: other type of lices
+		dataM := StringSliceToListFieldValues(data.([]string))
+		return NormalizeFieldData(path, presetFields, dataM)
+	case []interface{}:
+		dataM := AnySliceToListFieldValues(data.([]interface{}))
+		return NormalizeFieldData(path, presetFields, dataM)
 	case string:
 		{
 			dataS := data.(string)
-
 			if yes, dataM := TryToNormalizeStringReferFieldData(path, presetFields, dataS); yes {
 				return dataM
 			}
 			if yes, dataM := TryToNormalizeStringFileFieldData(dataS); yes {
 				return dataM
 			}
-
 			return NormalizePrimitiveFieldData(dataS)
 		}
 	case map[string]interface{}:
 		{
 			dataM := data.(map[string]interface{})
-			if nameInData, hasName := dataM["name"]; hasName && nameInData != path.Name() {
-				panic(fmt.Errorf("%s: conflicting names - %v vs. %s", path, nameInData, path.Name()))
-			}
 			if yes, dataM := TryToNormalizeMapRefFieldData(path, presetFields, dataM); yes {
 				return dataM
 			}
 			return NormalizeMapListFieldData(path, presetFields, dataM)
 		}
-	case []interface{}:
-		panic("TODO")
 	default:
 		return NormalizePrimitiveFieldData(data)
 	}

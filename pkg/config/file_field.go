@@ -1,8 +1,7 @@
 package config
 
 import (
-	"strings"
-
+	"github.com/qiangyt/loggen/pkg/util/str"
 	_ "github.com/qiangyt/loggen/res/statik"
 )
 
@@ -19,10 +18,11 @@ func NewFileField(name string, data map[string]interface{}) FileField {
 }
 
 func TryToNormalizeStringFileFieldData(data string) (bool, map[string]interface{}) {
-	if strings.IndexAny(data, "^") == 0 {
+	if url, found := str.TrimPrefix(data, "^"); found {
+		// TODO: validate the file
 		return true, map[string]interface{}{
 			"type": FieldType_File,
-			"url":  data[1:], // remove the leading '^'
+			"url":  url, // remove the leading '^'
 		}
 	}
 	return false, map[string]interface{}{}

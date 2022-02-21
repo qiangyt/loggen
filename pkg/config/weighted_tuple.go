@@ -7,8 +7,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const DefaultWeight = 1 //TODO: move elsewhere
-
 type WeightedTupleT struct {
 	Key    string
 	Weight uint32
