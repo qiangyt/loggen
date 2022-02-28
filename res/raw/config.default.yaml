@@ -13,12 +13,12 @@ presetFields:
 
 generators:
   nginxAccess:
-    type: flat
+    format: flat
     template: '{{printf "%15s" .ipv4}} - - [{{printf "%21s" .timestamp}} 0800] "{{with .weightedHttpRequest}}{{.method}} {{.path}} HTTP/1.1" {{.responseCode}} {{.esponseLength}} "{{.server}}"{{end}} "{{.weightedHttpAgent}}"'
     fields:
       timestamp: {timeFormat: 02/Jan/2006:15:04:05}
   bunyan:
-    type: json
+    format: json
     schema:
       time: '{{.timestamp}}'
       level: '{{.app.level}}'

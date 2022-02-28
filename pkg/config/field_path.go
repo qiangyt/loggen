@@ -41,6 +41,11 @@ func (me FieldPath) HasWeight() bool {
 	return HasWeight(me.Weight())
 }
 
+func (me FieldPath) Child(name string) FieldPath {
+	childPath := fmt.Sprintf("%s.%s", me.Path(), name)
+	return NewFieldPath(childPath)
+}
+
 func HasWeight(weight int) bool {
 	return weight >= 0
 }

@@ -22,34 +22,33 @@ func NewReferFieldT(target Field, name string, data map[string]interface{}) Refe
 	panic("TODO")
 }
 
-func TryToNormalizeStringReferFieldData(path FieldPath, presetFields map[string]Field, data string) (bool, map[string]interface{}) {
+func TryBuildStringReferFieldData(path FieldPath, presetFields map[string]Field, data string) (bool, FieldData) {
 	if refer, yes := str.TrimPrefix(data, "$"); yes {
-		return true, _normalizeRefFieldData(path, presetFields, refer, map[string]interface{}{})
+		return true, _buildRefFieldData(path, presetFields, refer, map[string]interface{}{})
 	}
-	return false, map[string]interface{}{}
+	return false, nil
 }
 
-func TryToNormalizeMapRefFieldData(path FieldPath, presetFields map[string]Field, data map[string]interface{}) (bool, map[string]interface{}) {
+func TryBuildMapRefFieldData(path FieldPath, presetFields map[string]Field, data map[string]interface{}) (bool, FieldData) {
 	if fType, found := _map.OptionalString(data, "type", path.Path()); !found {
 		if fType != FieldType_Refer {
-			return false, data
+			return false, nil
 		}
 	}
 
 	refer := _map.DefaultString(data, "refer", path.Name(), path.Path())
-	return true, _normalizeRefFieldData(path, presetFields, refer, data)
+	return true, _buildRefFieldData(path, presetFields, refer, data)
 }
 
-func _normalizeRefFieldData(path FieldPath, presetFields map[string]Field, refer string, data map[string]interface{}) map[string]interface{} {
+func _buildRefFieldData(path FieldPath, presetFields map[string]Field, refer string, data map[string]interface{}) FieldData {
 	var presetField Field
 	if presetField = presetFields[refer]; presetField == nil {
 		panic(fmt.Errorf("%s: preset field %s not found", path, refer))
 	}
 
 	data["type"] = FieldType_Refer
-	data["refer"] = presetField
 
-	return data
+	return BuildFieldDataWithMap(path, presetFields, data)
 }
 
 func (me ReferField) Normalize(hint string) {

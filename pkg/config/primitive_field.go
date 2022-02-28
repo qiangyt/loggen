@@ -18,11 +18,13 @@ func NewPrimitiveField(name string, data map[string]interface{}) PrimitiveField 
 	}
 }
 
-func NormalizePrimitiveFieldData(data interface{}) map[string]interface{} {
-	return map[string]interface{}{
-		"type":  FieldType_Primitive,
-		"value": data,
+func BuildPrimitiveFieldData(path FieldPath, presetFields map[string]Field, data interface{}) FieldData {
+	r := &FieldDataT{
+		Path:   path,
+		Type:   FieldType_Primitive,
+		Others: map[string]interface{}{"value": data},
 	}
+	return r
 }
 
 func (me PrimitiveField) GetType() FieldType {

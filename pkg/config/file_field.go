@@ -12,20 +12,22 @@ type FileField = *FileFieldT
 
 func NewFileField(name string, data map[string]interface{}) FileField {
 	return &FileFieldT{
-		Name:  name,
-		Value: data["values"],
+		//Name:  name,
+		//Value: data["values"],
 	}
 }
 
-func TryToNormalizeStringFileFieldData(data string) (bool, map[string]interface{}) {
+func TryToBuildStringFileFieldData(path FieldPath, presetFields map[string]Field, data string) (bool, FieldData) {
 	if url, found := str.TrimPrefix(data, "^"); found {
 		// TODO: validate the file
-		return true, map[string]interface{}{
-			"type": FieldType_File,
-			"url":  url, // remove the leading '^'
+		r := &FieldDataT{
+			Path:   path,
+			Type:   FieldType_File,
+			Others: map[string]interface{}{"url": url},
 		}
+		return true, r
 	}
-	return false, map[string]interface{}{}
+	return false, nil
 }
 
 func (me FileField) GetType() FieldType {

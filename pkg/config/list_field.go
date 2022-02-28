@@ -22,32 +22,38 @@ func NewListField(path string, name string, data map[string]interface{}) ListFie
 	//TODO? reflect.TypeOf(values)
 	return &ListFieldT{
 		Name:   name,
-		Values: []interface{}{values},
+		Values: values,
 	}
 }
 
-func StringSliceToListFieldValues(data []string) map[string]interface{} {
+func BuildFieldDataWithStringSlice(path FieldPath, presetFields map[string]Field, data []string) FieldData {
 	values := []map[string]interface{}{}
 	for _, value := range data {
 		values = append(values, map[string]interface{}{"value": value})
 	}
 
-	return map[string]interface{}{"values": values}
+	r := &FieldDataT{
+		Path: path,
+		Type: FieldType_List,
+	}
+
+	r.NormalizeValues(presetFields, values)
+	return r
 }
 
-func AnySliceToListFieldValues(data []interface{}) map[string]interface{} {
+func BuildFieldDataWithAnySlice(path FieldPath, presetFields map[string]Field, data []interface{}) FieldData {
 	values := []map[string]interface{}{}
 	for _, value := range data {
 		values = append(values, map[string]interface{}{"value": value})
 	}
 
-	return map[string]interface{}{"values": values}
-}
+	r := &FieldDataT{
+		Path: path,
+		Type: FieldType_List,
+	}
 
-func NormalizeMapListFieldData(path FieldPath, presetFields map[string]Field, data map[string]interface{}) map[string]interface{} {
-	_map.MustAnySlice(data, "values", path.Path())
-	data["type"] = FieldType_List
-	return data
+	r.NormalizeValues(presetFields, values)
+	return r
 }
 
 func (me ListField) GetType() FieldType {
