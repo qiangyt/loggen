@@ -8,28 +8,28 @@ import (
 var DefaultWeight = 1
 
 type ListFieldT struct {
-	Name     string
-	Values   interface{}
-	Chooser  Chooser
-	Children map[string]Field
+	Name       string
+	Candidates interface{}
+	Chooser    Chooser
+	Children   map[string]Field
 }
 
 type ListField = *ListFieldT
 
 func NewListField(path string, name string, data map[string]interface{}) ListField {
-	values := _map.Must(data, "values", path)
+	candidates := _map.Must(data, "candidates", path)
 
-	//TODO? reflect.TypeOf(values)
+	//TODO? reflect.TypeOf(candidates)
 	return &ListFieldT{
-		Name:   name,
-		Values: values,
+		Name:       name,
+		Candidates: candidates,
 	}
 }
 
 func BuildFieldDataWithStringSlice(path FieldPath, presetFields map[string]Field, data []string) FieldData {
-	values := []map[string]interface{}{}
-	for _, value := range data {
-		values = append(values, map[string]interface{}{"value": value})
+	candidates := []map[string]interface{}{}
+	for _, candidate := range data {
+		candidates = append(candidates, map[string]interface{}{"candidate": candidate})
 	}
 
 	r := &FieldDataT{
@@ -37,14 +37,14 @@ func BuildFieldDataWithStringSlice(path FieldPath, presetFields map[string]Field
 		Type: FieldType_List,
 	}
 
-	r.NormalizeValues(presetFields, values)
+	r.NormalizeCandidates(presetFields, candidates)
 	return r
 }
 
 func BuildFieldDataWithAnySlice(path FieldPath, presetFields map[string]Field, data []interface{}) FieldData {
-	values := []map[string]interface{}{}
-	for _, value := range data {
-		values = append(values, map[string]interface{}{"value": value})
+	candidates := []map[string]interface{}{}
+	for _, candidate := range data {
+		candidates = append(candidates, map[string]interface{}{"candidate": candidate})
 	}
 
 	r := &FieldDataT{
@@ -52,7 +52,7 @@ func BuildFieldDataWithAnySlice(path FieldPath, presetFields map[string]Field, d
 		Type: FieldType_List,
 	}
 
-	r.NormalizeValues(presetFields, values)
+	r.NormalizeCandidates(presetFields, candidates)
 	return r
 }
 
@@ -68,8 +68,8 @@ func (me ListField) GetName() string {
 	return me.Name
 }
 
-func (me ListField) GetValue() interface{} {
-	return me.Values
+func (me ListField) GetCandidate() interface{} {
+	return me.Candidates
 }
 
 func (me ListField) GetChooser() Chooser {

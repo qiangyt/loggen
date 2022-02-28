@@ -30,7 +30,7 @@ func TryBuildStringReferFieldData(path FieldPath, presetFields map[string]Field,
 }
 
 func TryBuildMapRefFieldData(path FieldPath, presetFields map[string]Field, data map[string]interface{}) (bool, FieldData) {
-	if fType, found := _map.OptionalString(data, "type", path.Path()); !found {
+	if fType, found := _map.OptionalString(data, "type", path.Path()); found {
 		if fType != FieldType_Refer {
 			return false, nil
 		}

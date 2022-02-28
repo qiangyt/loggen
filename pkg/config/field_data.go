@@ -10,33 +10,33 @@ import (
 )
 
 type FieldDataT struct {
-	Path    FieldPath
-	Type    FieldType
-	Values  interface{} // is slice, actually
-	Name    string
-	Chooser Chooser
-	Others  map[string]interface{} `mapstructure:",remain"`
+	Path       FieldPath
+	Type       FieldType
+	Candidates interface{} // is slice, actually
+	Name       string
+	Chooser    Chooser
+	Others     map[string]interface{} `mapstructure:",remain"`
 }
 
 type FieldData = *FieldDataT
 
-func (me FieldData) NormalizeValues(presetFields map[string]Field, values []map[string]interface{}) {
+func (me FieldData) NormalizeCandidates(presetFields map[string]Field, candidates []map[string]interface{}) {
 	//chooser := RandomChooser
-	valuesType := reflect.TypeOf(values)
-	switch valuesType.Kind() {
+	candidatesType := reflect.TypeOf(candidates)
+	switch candidatesType.Kind() {
 	case reflect.Array, reflect.Slice:
 		if !alreadyNormalized {
-			valuesA := values.([]map[string]interface{})
-			for i, valueData := range valuesA {
-				valuesA[i] = NormalizeFieldData(path, presetFields, valueData)
+			candidatesA := candidates.([]map[string]interface{})
+			for i, valueData := range candidatesA {
+				candidatesA[i] = NormalizeFieldData(path, presetFields, valueData)
 			}
 		}
 	default:
-		panic(fmt.Errorf("%s: values must be either array/slice or map/object", path))
+		panic(fmt.Errorf("%s: candidates must be either array/slice or map/object", path))
 	}
 
 	me.Type = FieldType_List
-	me.Values = valuesData
+	me.Candidates = candidatesData
 }
 
 func NewFieldData(path FieldPath, presetFields map[string]Field, data interface{}) FieldData {
@@ -65,10 +65,10 @@ func BuildFieldDataWithMap(path FieldPath, presetFields map[string]Field, data m
 		panic(errors.Wrapf(err, "%s: failed to decode map -> %v", path.Path(), data))
 	}
 
-	if r.Values != nil {
-		valuesData := NewFieldData(path.Child("values"), presetFields, r.Values)
-		values := valuesData.Values.([]map[string]interface{})
-		r.NormalizeValues(presetFields, values)
+	if r.Candidates != nil {
+		candidatesData := NewFieldData(path.Child("candidates"), presetFields, r.Candidates)
+		candidates := candidatesData.Candidates.([]map[string]interface{})
+		r.NormalizeCandidates(presetFields, candidates)
 	}
 
 	return r

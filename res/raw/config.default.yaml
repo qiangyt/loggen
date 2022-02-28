@@ -34,43 +34,44 @@ generators:
       level: [10(5), 20(5), 30(70), 40(10), 50(5), 60(5)]
 
 apps:
-  nginx*4:
-    generator: nginxAccess
-  apiGateway*2:
-    generator: bunyan
-    pid: {amount: 2}
-    logger:
-      values:
-        dispatcher*3:
-          file: dispatch_handler.lua
-          message: $randomMessage
-        backend*1:
-          file: backend_handler.lua
-          message: $randomMessage
-    host:
-      values:
-        apiw-1: {ip: 192.168.1.11}
-        apiw-2: {ip: 192.168.1.12}
-  application*6:
-    generator: bunyan
-    pid:
-      begin: 2000
-      end: 3000
-      amount: 3
-    logger:
-      values:
-        OrderController*1:
-          file: OrderController.java
-          message: $randomMessage
-        OrdreService*3:
-          file: OrderService.java
-          message: $randomMessage
-        OrderRepository*6:
-          file: OrderRepository.java
-          message: $randomMessage
-    host:
-      values:
-        app-1: {ip: 192.168.2.11}
-        app-2: {ip: 192.168.2.12}
-        app-3: {ip: 192.168.2.13}
+  candidates:
+    nginx*4:
+      generator: nginxAccess
+    apiGateway*2:
+      generator: bunyan
+      pid: {amount: 2}
+      logger:
+        candidates:
+          dispatcher*3:
+            file: dispatch_handler.lua
+            message: $randomMessage
+          backend*1:
+            file: backend_handler.lua
+            message: $randomMessage
+      host:
+        candidates:
+          apiw-1: {ip: 192.168.1.11}
+          apiw-2: {ip: 192.168.1.12}
+    application*6:
+      generator: bunyan
+      pid:
+        begin: 2000
+        end: 3000
+        amount: 3
+      logger:
+        candidates:
+          OrderController*1:
+            file: OrderController.java
+            message: $randomMessage
+          OrdreService*3:
+            file: OrderService.java
+            message: $randomMessage
+          OrderRepository*6:
+            file: OrderRepository.java
+            message: $randomMessage
+      host:
+        candidates:
+          app-1: {ip: 192.168.2.11}
+          app-2: {ip: 192.168.2.12}
+          app-3: {ip: 192.168.2.13}
 
